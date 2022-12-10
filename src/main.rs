@@ -1,29 +1,36 @@
 
 
 use axum::{routing, extract};
-use redb::ReadableTable;
 use std::{
     net::SocketAddr,
-    sync::Arc
+    sync::{Arc, Mutex},
 };
 
 
 #[derive(Clone)]
 struct State {
-    db: Arc<redb::Database>
+    db: Arc<Mutex<sqlite::Connection>>
 }
-
-const BLOGS: redb::TableDefinition<&str, &str> = redb::TableDefinition::new("blogs");
-
 
 
 #[tokio::main]
 async fn main() {
-    let db = unsafe {
-        redb::Database::create("blogs.redb")
-            .expect("Database Error")
-    };
-    let db = Arc::new(db);
+    let db = sqlite::open("blogs.sqlite")
+        .expect("Cannot open DB");
+
+    let q = "
+        CREATE TABLE blogs (
+            title TEXT NOT NULL PRIMARY_KEY,
+            body TEXT NOT NULL,
+            added TEXT NOT NULL,
+        );";
+    if let Err(sqlite::Error { message: Some(message), .. }) = db.execute(q) {
+        if message != "table blogs already exists" {
+            panic!("{message}")
+        }
+    }
+    let db = Arc::new(Mutex::new(db));
+
 
     let state = State {
         db,
@@ -50,17 +57,34 @@ async fn get_articles(
     extract::State(st): extract::State<State>,
 ) -> String {
     let db = Arc::clone(&st.db);
-    let txn = db.begin_read().expect("Txn read error");
+    let db = db.lock().unwrap();
 
-    let mut articles = vec![];
-    for t in txn.list_tables() {
-        for a in t {
-            articles.push(a)
+    let q = "
+        SELECT added, title FROM blogs
+    ";
+
+    let mut resp = String::new();
+
+    db.iterate(q, |pairs| {
+        for &(column, value) in pairs {
+            match (column, value) {
+                ("added", Some(date)) => {
+                    resp.push('\n');
+                    resp.push_str(date);
+                    resp.push_str(" - ");
+                },
+                ("title", Some(title)) => {
+                    resp.push_str(title)
+                },
+                _ => {
+                    resp = String::from("invalid format");
+                }
+            }
         }
-    }
+        true
+    }).unwrap();
 
-    let x = articles.join("\nhttp://127.0.0.1:300/blog/");
-    x
+    resp
 }
 
 async fn get_about() -> &'static str {
@@ -68,37 +92,50 @@ async fn get_about() -> &'static str {
 }
 
 async fn get_article(
-    extract::Path(title): extract::Path<String>,
     extract::State(st): extract::State<State>,
+    extract::Path(title): extract::Path<String>,
 ) -> String {
     let db = Arc::clone(&st.db);
-    let txn = db.begin_read().expect("Txn read error");
-    {
-        let table = txn.open_table(BLOGS).expect("Open read error");
-        if let Some(article) = table
-            .get(&title)
-            .expect("Get read error")
-        {
-            return String::from(article)
-        } else {
-            return title
+    let db = db.lock().unwrap();
+    let q = format!("
+        SELECT title, body FROM blogs WHERE title = '{title}'
+    ");
+
+    let mut resp = String::new();
+    db.iterate(q, |pairs| {
+        for &(column, value) in pairs {
+            match (column, value) {
+                ("title", Some(title)) => {
+                    resp.push_str(title);
+                    resp.push_str("\n");
+                },
+                ("body", Some(body)) => {
+                    resp.push_str(body);
+                    return true;
+                },
+                _ => {
+                    resp = String::from("invalid format");
+                }
+            }
         }
-    }
+        true
+    }).unwrap();
+
+    resp
 }
 
 async fn create_article(
-    extract::Path(title): extract::Path<String>,
     extract::State(st): extract::State<State>,
+    extract::Path(title): extract::Path<String>,
     payload: String,
 ) -> String {
     let db = Arc::clone(&st.db);
-    let txn = db.begin_write().expect("Txn error");
-    {
-        let mut table = txn.open_table(BLOGS).expect("Open error");
-        table.insert(&title, &payload).expect("Insert error");
-    }
-    txn.commit().expect("Txn commit error");
-
+    let db = db.lock().unwrap();
+    let q = format!("
+         INSERT INTO blogs (title, body, added)
+            VALUES ('{title}', '{payload}', DATE('now'));
+    ");
+    db.execute(q).unwrap();
 
     format!("title: {title}, payload: {payload}")
 }
