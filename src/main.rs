@@ -1,6 +1,6 @@
 
 
-use axum::{routing, extract};
+use axum::{routing as r, extract as e, http as h};
 use std::{
     net::SocketAddr,
     sync::{Arc, Mutex},
@@ -23,25 +23,27 @@ async fn main() {
             title TEXT NOT NULL PRIMARY_KEY,
             body TEXT NOT NULL,
             added TEXT NOT NULL,
-        );";
-    if let Err(sqlite::Error { message: Some(message), .. }) = db.execute(q) {
+        );
+    ";
+    if let Err(sqlite::Error { message: Some(message), .. }) = db
+        .execute(q)
+    {
         if message != "table blogs already exists" {
             panic!("{message}")
         }
     }
+
     let db = Arc::new(Mutex::new(db));
-
-
     let state = State {
         db,
     };
 
     let app: axum::Router<_, axum::body::Body> = axum::Router::new()
-        .route("/", routing::get(get_about))
-        .route("/blog", routing::get(get_articles))
-        .route("/blog/:title", routing::post(create_article))
-        .route("/blog/:title", routing::get(get_article))
-        .route("/image/:title", routing::get(get_article))
+        .route("/", r::get(get_about))
+        .route("/blog", r::get(get_articles))
+        .route("/blog/:title", r::post(create_article))
+        .route("/blog/:title", r::get(get_article))
+        .route("/image/:title", r::get(get_article))
         .with_state(state);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
@@ -52,9 +54,12 @@ async fn main() {
 }
 
 
+async fn get_about() -> &'static str {
+    "Hello world: about"
+}
 
 async fn get_articles(
-    extract::State(st): extract::State<State>,
+    e::State(st): e::State<State>,
 ) -> String {
     let db = Arc::clone(&st.db);
     let db = db.lock().unwrap();
@@ -87,13 +92,9 @@ async fn get_articles(
     resp
 }
 
-async fn get_about() -> &'static str {
-    "Hello world: about"
-}
-
 async fn get_article(
-    extract::State(st): extract::State<State>,
-    extract::Path(title): extract::Path<String>,
+    e::State(st): e::State<State>,
+    e::Path(title): e::Path<String>,
 ) -> String {
     let db = Arc::clone(&st.db);
     let db = db.lock().unwrap();
@@ -125,17 +126,26 @@ async fn get_article(
 }
 
 async fn create_article(
-    extract::State(st): extract::State<State>,
-    extract::Path(title): extract::Path<String>,
+    e::State(st): e::State<State>,
+    e::Path(title): e::Path<String>,
+    headers: h::header::HeaderMap,
     payload: String,
-) -> String {
+) -> h::StatusCode {
+    let Some(hv) = headers.get("authorization") else {
+        return h::StatusCode::FORBIDDEN
+    };
+    let Ok("Basic YWRtaW46YWRtaW4=") = hv.to_str() else {
+        return h::StatusCode::FORBIDDEN
+    };
+
     let db = Arc::clone(&st.db);
     let db = db.lock().unwrap();
+
     let q = format!("
          INSERT INTO blogs (title, body, added)
             VALUES ('{title}', '{payload}', DATE('now'));
     ");
     db.execute(q).unwrap();
 
-    format!("title: {title}, payload: {payload}")
+    h::StatusCode::ACCEPTED
 }
