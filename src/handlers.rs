@@ -3,7 +3,6 @@ use axum::{
     extract::*,
     http,
 };
-use std::sync::Arc;
 
 
 pub async fn get_about() -> axum::response::Html<String> {
@@ -23,46 +22,17 @@ pub async fn get_about() -> axum::response::Html<String> {
 
 
 
-
 pub async fn get_articles(
-    State(st): State<crate::Database>,
+    State(db): State<crate::database::Database>,
 ) -> axum::response::Html<String> {
 
-    let db = Arc::clone(&st.db);
-    let db = db.lock().unwrap();
-
-    let q = "
-        SELECT added, title FROM blogs
-    ";
-
-    let mut resp = vec![];
-
-    db.iterate(q, |pairs| {
-        let mut added = None;
-
-        for &(column, value) in pairs {
-            match (column, value) {
-                ("added", date_added) => {
-                    added = date_added;
-                },
-                ("title", title) => {
-                    resp.push((
-                        added.unwrap().to_string(),
-                        title.unwrap().to_string()
-                    ));
-                },
-                _ => { }
-            }
-        }
-
-        true
-    }).unwrap();
+    let articles = db.fetch_articles();
 
     let markup = maud::html! {
         h1 { "Welcome to my blog!" }
 
         div style="display: flex; flex-direction: column" {
-            @for (added, title) in resp {
+            @for (added, title) in articles {
                 a href=(format!("http://127.0.0.1:3000/blog/{title}")) {
                     (format!("{added} - {title}\n"))
                 }
@@ -76,37 +46,12 @@ pub async fn get_articles(
 
 
 
-
 pub async fn get_article(
-    State(st): State<crate::Database>,
+    State(db): State<crate::database::Database>,
     Path(title): Path<String>,
 ) -> axum::response::Html<String> {
-    let db = Arc::clone(&st.db);
-    let db = db.lock().unwrap();
-    let q = format!("
-        SELECT title, body FROM blogs WHERE title = '{title}'
-    ");
 
-    let mut article_title = String::new();
-    let mut article_body = String::new();
-
-    db.iterate(q, |pairs| {
-        for &(column, value) in pairs {
-            match (column, value) {
-                ("title", Some(title)) => {
-                    article_title.push_str(title);
-                },
-                ("body", Some(body)) => {
-                    article_body.push_str(body);
-                    return true;
-                },
-                _ => {
-                    article_title = String::from("invalid format");
-                }
-            }
-        }
-        true
-    }).unwrap();
+    let (article_title, article_body) = db.fetch_article(&title);
 
     let mut output = String::new();
     let parser = pulldown_cmark::Parser::new(&article_body);
@@ -124,13 +69,13 @@ pub async fn get_article(
 
 
 
-
 pub async fn create_article(
-    State(st): State<crate::Database>,
+    State(st): State<crate::database::Database>,
     Path(title): Path<String>,
     headers: axum::http::header::HeaderMap,
-    payload: String,
+    body: String,
 ) -> http::StatusCode {
+
     let Some(hv) = headers.get("authorization") else {
         return http::StatusCode::FORBIDDEN
     };
@@ -138,14 +83,7 @@ pub async fn create_article(
         return http::StatusCode::FORBIDDEN
     };
 
-    let db = Arc::clone(&st.db);
-    let db = db.lock().unwrap();
-
-    let q = format!("
-         INSERT INTO blogs (title, body, added)
-            VALUES ('{title}', '{payload}', DATE('now'));
-    ");
-    db.execute(q).unwrap();
+    st.create_article(&title, &body);
 
     http::StatusCode::ACCEPTED
 }
