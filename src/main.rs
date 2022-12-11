@@ -10,7 +10,7 @@ use std::{
     net::SocketAddr,
     sync::{Arc, Mutex},
 };
-use maud::html;
+use maud::{html, PreEscaped};
 
 
 #[derive(Clone)]
@@ -115,34 +115,44 @@ async fn get_articles(
 async fn get_article(
     e::State(st): e::State<State>,
     e::Path(title): e::Path<String>,
-) -> String {
+) -> s::Html<String> {
     let db = Arc::clone(&st.db);
     let db = db.lock().unwrap();
     let q = format!("
         SELECT title, body FROM blogs WHERE title = '{title}'
     ");
 
-    let mut resp = String::new();
+    let mut article_title = String::new();
+    let mut article_body = String::new();
+
     db.iterate(q, |pairs| {
         for &(column, value) in pairs {
             match (column, value) {
                 ("title", Some(title)) => {
-                    resp.push_str(title);
-                    resp.push_str("\n");
+                    article_title.push_str(title);
                 },
                 ("body", Some(body)) => {
-                    resp.push_str(body);
+                    article_body.push_str(body);
                     return true;
                 },
                 _ => {
-                    resp = String::from("invalid format");
+                    article_title = String::from("invalid format");
                 }
             }
         }
         true
     }).unwrap();
 
-    resp
+    let mut output = String::new();
+    let parser = pulldown_cmark::Parser::new(&article_body);
+    pulldown_cmark::html::push_html(&mut output, parser);
+
+    let markup = html! {
+        h1 { (article_title) }
+        (PreEscaped(output))
+    };
+
+    s::Html::from(markup.into_string())
 }
 
 async fn create_article(
