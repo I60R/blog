@@ -1,10 +1,16 @@
 
 
-use axum::{routing as r, extract as e, http as h};
+use axum::{
+    routing as r,
+    response as s,
+    extract as e,
+    http as h,
+};
 use std::{
     net::SocketAddr,
     sync::{Arc, Mutex},
 };
+use maud::html;
 
 
 #[derive(Clone)]
@@ -60,7 +66,7 @@ async fn get_about() -> &'static str {
 
 async fn get_articles(
     e::State(st): e::State<State>,
-) -> String {
+) -> s::Html<String> {
     let db = Arc::clone(&st.db);
     let db = db.lock().unwrap();
 
@@ -68,28 +74,42 @@ async fn get_articles(
         SELECT added, title FROM blogs
     ";
 
-    let mut resp = String::new();
+    let mut resp = vec![];
 
     db.iterate(q, |pairs| {
+        let mut added = None;
+
         for &(column, value) in pairs {
             match (column, value) {
-                ("added", Some(date)) => {
-                    resp.push('\n');
-                    resp.push_str(date);
-                    resp.push_str(" - ");
+                ("added", date_added) => {
+                    added = date_added;
                 },
-                ("title", Some(title)) => {
-                    resp.push_str(title)
+                ("title", title) => {
+                    resp.push((
+                        added.unwrap().to_string(),
+                        title.unwrap().to_string()
+                    ));
                 },
-                _ => {
-                    resp = String::from("invalid format");
-                }
+                _ => { }
             }
         }
+
         true
     }).unwrap();
 
-    resp
+    let markup = html! {
+        h1 { "Welcome to my blog!" }
+
+        div style="display: flex; flex-direction: column" {
+            @for (added, title) in resp {
+                a href=(format!("http://127.0.0.1:3000/blog/{title}")) {
+                    (format!("{added} - {title}\n"))
+                }
+            }
+        }
+    };
+
+    s::Html::from(markup.into_string())
 }
 
 async fn get_article(
