@@ -5,8 +5,6 @@ use axum::routing;
 use std::net::SocketAddr;
 
 
-
-
 #[tokio::main]
 async fn main() {
     let connection = sqlite::open("blogs.sqlite")

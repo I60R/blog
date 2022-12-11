@@ -4,6 +4,8 @@ use axum::{
     http,
 };
 
+const ADDR: &str = "127.0.0.1:3000";
+
 
 pub async fn get_about() -> axum::response::Html<String> {
 
@@ -33,7 +35,7 @@ pub async fn get_articles(
 
         div style="display: flex; flex-direction: column" {
             @for (added, title) in articles {
-                a href=(format!("http://127.0.0.1:3000/blog/{title}")) {
+                a href=(format!("http://{ADDR}/blog/{title}")) {
                     (format!("{added} - {title}\n"))
                 }
             }
