@@ -23,9 +23,9 @@ impl Database {
 
         let q = "
             CREATE TABLE blogs (
-                title TEXT NOT NULL PRIMARY_KEY,
+                title TEXT NOT NULL PRIMARY KEY,
                 body TEXT NOT NULL,
-                added TEXT NOT NULL,
+                added TEXT NOT NULL
             );
         ";
 
