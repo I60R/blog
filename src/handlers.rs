@@ -10,8 +10,16 @@ const ADDR: &str = "127.0.0.1:3000";
 pub async fn get_about() -> axum::response::Html<String> {
 
     let markup = maud::html! {
-        div style="display: flex; flex-direction: column" {
-            h1 { "Welcome to my blog!" }
+        div style="display: flex; flex-direction: column; padding: 5em; width: 60em" {
+            h1 { "Welcome to 160R's blog!" }
+            h2 { "Software" }
+            a href="https://github.com/I60R/page" style="font-weight: bold" {
+                "page"
+            }
+            a href="https://github.com/I60R/javelin" style="font-weight: bold" {
+                "javelin"
+            }
+            h2 { "Articles" }
             a href="blog" {
                 "list articles"
             }
