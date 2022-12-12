@@ -79,12 +79,10 @@ pub async fn get_article(
     pulldown_cmark::html::push_html(&mut output, parser);
 
     let markup = maud::html! {
-        div style="padding: 5em; font-family: Helvetica" {
+        div style="padding: 5em; width: 60em; font-family: Helvetica" {
             h1 { (article_title) }
 
-            div style="width: 100%; max-width: 120em" {
-                (maud::PreEscaped(output))
-            }
+            (maud::PreEscaped(output))
         }
     };
 
