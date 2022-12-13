@@ -7,31 +7,6 @@ use axum::{
 const ADDR: &str = "127.0.0.1:3000";
 
 
-pub async fn get_about() -> axum::response::Html<String> {
-
-    let markup = maud::html! {
-        div style="display: flex; flex-direction: column; padding: 5em; width: 60em" {
-            h1 { "Welcome to 160R's blog!" }
-            h2 { "Software" }
-            a href="https://github.com/I60R/page" style="font-weight: bold" {
-                "page"
-            }
-            a href="https://github.com/I60R/javelin" style="font-weight: bold" {
-                "javelin"
-            }
-            h2 { "Articles" }
-            a href="blog" {
-                "list articles"
-            }
-        }
-    };
-
-    let markup = markup.into_string();
-    axum::response::Html::from(markup)
-}
-
-
-
 pub async fn get_articles(
     State(db): State<crate::database::Database>,
 ) -> axum::response::Html<String> {
@@ -46,10 +21,18 @@ pub async fn get_articles(
             (added, title)
         });
 
-    let markup = maud::html! {
-        div style="padding: 5em; font-family: Helvetica" {
-            h1 { "Welcome to my blog!" }
 
+    let markup = maud::html! {
+        div style="display: flex; flex-direction: column; padding: 5em; width: 60em" {
+            h1 { "Welcome to 160R's blog!" }
+            h2 { "Software" }
+            a href="https://github.com/I60R/page" style="font-weight: bold" {
+                "page"
+            }
+            a href="https://github.com/I60R/javelin" style="font-weight: bold" {
+                "javelin"
+            }
+            h2 { "Articles" }
             div style="display: flex; flex-direction: column" {
                 @for (added, title) in articles {
                     a

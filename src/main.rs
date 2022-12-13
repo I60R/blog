@@ -2,6 +2,7 @@ mod handlers;
 mod database;
 
 use axum::routing;
+use axum::response::Redirect;
 use std::net::SocketAddr;
 
 
@@ -13,9 +14,11 @@ async fn main() {
     db.init();
 
     let app: axum::Router<_, axum::body::Body> = axum::Router::new()
-        .route("/", routing::get(handlers::get_about))
+        .route("/", routing::get(|| async { Redirect::permanent("/blog") }))
         .route("/blog", routing::get(handlers::get_articles))
+        .route("/blog/", routing::get(|| async { Redirect::permanent("/blog") }))
         .route("/blog/:title", routing::get(handlers::get_article))
+        .route("/blog/:title/", routing::get(|| async { Redirect::permanent("/blog") }))
         .route("/blog/:title", routing::post(handlers::create_article))
         .with_state(db);
 
