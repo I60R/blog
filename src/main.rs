@@ -2,7 +2,7 @@ mod handlers;
 mod database;
 
 use axum::{
-    extract::{self, Path},
+    extract::Path,
     routing,
     response::Redirect,
 };
