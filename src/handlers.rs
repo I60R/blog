@@ -91,18 +91,20 @@ pub async fn create_article(
 ) -> http::StatusCode {
 
     let Some(hv) = headers.get("authorization") else {
-        return http::StatusCode::FORBIDDEN
+        return http::StatusCode::UNAUTHORIZED
     };
     let Ok("Basic YWRtaW46YWRtaW4=") = hv.to_str() else {
-        return http::StatusCode::FORBIDDEN
+        return http::StatusCode::UNAUTHORIZED
     };
 
     let title = urlencoding::encode(&title);
     let body = base64::encode(body);
 
-    st.create_article(&title, &body);
-
-    http::StatusCode::ACCEPTED
+    if st.create_article(&title, &body) {
+        http::StatusCode::CREATED
+    } else {
+        http::StatusCode::CONFLICT
+    }
 }
 
 pub async fn delete_article(
@@ -112,15 +114,17 @@ pub async fn delete_article(
 ) -> http::StatusCode {
 
     let Some(hv) = headers.get("authorization") else {
-        return http::StatusCode::FORBIDDEN
+        return http::StatusCode::UNAUTHORIZED
     };
     let Ok("Basic YWRtaW46YWRtaW4=") = hv.to_str() else {
-        return http::StatusCode::FORBIDDEN
+        return http::StatusCode::UNAUTHORIZED
     };
 
     let title = urlencoding::encode(&title);
 
-    st.delete_article(&title);
-
-    http::StatusCode::ACCEPTED
+    if st.delete_article(&title) {
+        http::StatusCode::OK
+    } else {
+        http::StatusCode::NO_CONTENT
+    }
 }

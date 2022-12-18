@@ -112,7 +112,7 @@ impl Database {
     }
 
 
-    pub fn create_article(&self, title: &str, body: &str) {
+    pub fn create_article(&self, title: &str, body: &str) -> bool {
 
         let db = Arc::clone(&self.db);
         let db = db
@@ -120,24 +120,41 @@ impl Database {
             .unwrap();
 
         let q = format!("
-             INSERT INTO blogs (title, body, added)
-                VALUES ('{title}', '{body}', DATE('now'));
+             INSERT OR IGNORE INTO blogs (title, body, added)
+                VALUES ('{title}', '{body}', DATE('now'))
+                RETURNING 0;
         ");
 
-        db.execute(q).unwrap();
+        let mut created = false;
 
+        db.iterate(q, |_pairs| {
+            created = true;
+            true
+        }).unwrap();
+
+        created
     }
 
-    pub(crate) fn delete_article(&self, title: &str) {
+    pub(crate) fn delete_article(&self, title: &str) -> bool {
 
         let db = Arc::clone(&self.db);
         let db = db
             .lock()
             .unwrap();
 
-        let q = format!("DELETE FROM blogs where title = '{title}'");
+        let q = format!("
+            DELETE FROM blogs WHERE title = '{title}'
+            RETURNING 0;
+        ");
 
-        db.execute(q).unwrap();
+        let mut deleted = false;
+
+        db.iterate(q, |_pairs| {
+            deleted = true;
+            true
+        }).unwrap();
+
+        deleted
     }
 }
 
