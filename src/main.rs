@@ -25,6 +25,7 @@ async fn main() {
             || async { Redirect::permanent("/blog") })
         )
         .route("/blog/:title", routing::post(handlers::create_article))
+        .route("/blog/:title", routing::delete(handlers::delete_article))
         .route("/blog/:title", routing::get(handlers::get_article))
         .route("/blog/:title/", routing::get(
             |Path(title): Path<String>| async move { Redirect::permanent(&format!("/blog/{title}")) })

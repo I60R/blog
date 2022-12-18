@@ -104,3 +104,23 @@ pub async fn create_article(
 
     http::StatusCode::ACCEPTED
 }
+
+pub async fn delete_article(
+    State(st): State<crate::database::Database>,
+    Path(title): Path<String>,
+    headers: axum::http::header::HeaderMap,
+) -> http::StatusCode {
+
+    let Some(hv) = headers.get("authorization") else {
+        return http::StatusCode::FORBIDDEN
+    };
+    let Ok("Basic YWRtaW46YWRtaW4=") = hv.to_str() else {
+        return http::StatusCode::FORBIDDEN
+    };
+
+    let title = urlencoding::encode(&title);
+
+    st.delete_article(&title);
+
+    http::StatusCode::ACCEPTED
+}

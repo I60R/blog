@@ -127,6 +127,18 @@ impl Database {
         db.execute(q).unwrap();
 
     }
+
+    pub(crate) fn delete_article(&self, title: &str) {
+
+        let db = Arc::clone(&self.db);
+        let db = db
+            .lock()
+            .unwrap();
+
+        let q = format!("DELETE FROM blogs where title = '{title}'");
+
+        db.execute(q).unwrap();
+    }
 }
 
 
