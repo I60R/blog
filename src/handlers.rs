@@ -65,9 +65,65 @@ pub async fn get_article(
     let article_body = base64::decode(article_body).unwrap();
     let article_body = String::from_utf8(article_body).unwrap();
 
-    let mut output = String::new();
-    let parser = pulldown_cmark::Parser::new(&article_body);
-    pulldown_cmark::html::push_html(&mut output, parser);
+    use syntect::{
+        highlighting::ThemeSet,
+        html::highlighted_html_for_string,
+        parsing::SyntaxSet
+    };
+    use pulldown_cmark::{html, Event, Parser, Tag, Options, CowStr};
+
+
+    // Setup for pulldown_cmark to read (only) from stdin
+    let opts = Options::empty();
+    let mut output = String::with_capacity(article_body.len() * 3 / 2);
+    let parser = Parser::new_ext(&article_body, opts);
+
+    // Setup for syntect to highlight (specifically) Rust code
+    let ss = SyntaxSet::load_defaults_newlines();
+    let ts = ThemeSet::load_defaults();
+    let syntax = ss.find_syntax_by_extension("rs").unwrap();
+    let theme = &ts.themes["InspiredGitHub"];
+
+    // We'll build a new vector of events since we can only consume the parser once
+    let mut new_p = Vec::new();
+    // As we go along, we'll want to highlight code in bundles, not lines
+    let mut to_highlight = String::new();
+    // And track a little bit of state
+    let mut in_code_block = false;
+
+    for event in parser {
+        match event {
+            Event::Start(Tag::CodeBlock(_)) => {
+                // In actual use you'd probably want to keep track of what language this code is
+                in_code_block = true;
+            }
+            Event::End(Tag::CodeBlock(_)) => {
+                if in_code_block {
+                    // Format the whole multi-line code block as HTML all at once
+                    let html = highlighted_html_for_string(&to_highlight, &ss, &syntax, &theme)
+                        .expect("cannot highlight");
+                    // And put it into the vector
+                    new_p.push(Event::Html(CowStr::from(html)));
+                    to_highlight = String::new();
+                    in_code_block = false;
+                }
+            }
+            Event::Text(t) => {
+                if in_code_block {
+                    // If we're in a code block, build up the string of text
+                    to_highlight.push_str(&t);
+                } else {
+                    new_p.push(Event::Text(t))
+                }
+            }
+            e => {
+                new_p.push(e);
+            }
+        }
+    }
+
+    // Now we send this new vector of events off to be transformed into HTML
+    html::push_html(&mut output, new_p.into_iter());
 
     let markup = maud::html! {
         div style="padding: 5em; width: 60em; font-family: Helvetica" {

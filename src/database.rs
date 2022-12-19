@@ -135,7 +135,7 @@ impl Database {
         created
     }
 
-    pub(crate) fn delete_article(&self, title: &str) -> bool {
+    pub fn delete_article(&self, title: &str) -> bool {
 
         let db = Arc::clone(&self.db);
         let db = db
