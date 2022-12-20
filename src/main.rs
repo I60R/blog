@@ -24,6 +24,14 @@ async fn main() {
         .route("/blog/", routing::get(
             || async { Redirect::permanent("/blog") })
         )
+        .route("/blog/next/:id", routing::get(handlers::next_article))
+        .route("/blog/next/", routing::get(
+            || async { Redirect::permanent("/blog") })
+        )
+        .route("/blog/prev/:id", routing::get(handlers::prev_article))
+        .route("/blog/prev/", routing::get(
+            || async { Redirect::permanent("/blog") })
+        )
         .route("/blog/:title", routing::post(handlers::create_article))
         .route("/blog/:title", routing::delete(handlers::delete_article))
         .route("/blog/:title", routing::get(handlers::get_article))

@@ -58,9 +58,30 @@ pub async fn get_article(
 ) -> axum::response::Html<String> {
 
     let title = urlencoding::encode(&title);
-    let (article_title, article_body) = db.fetch_article(&title);
+    let (article_id, article_title, article_body, is_last) = db.fetch_article(&title);
 
-    let article_title = urlencoding::decode(&article_title).unwrap();
+    display_article(&article_id, &article_title, &article_body, is_last)
+}
+
+pub async fn next_article(
+    State(db): State<crate::database::Database>,
+    Path(id): Path<String>,
+) -> axum::response::Redirect {
+    let article_title = db.fetch_article_title_by_id(&format!("({id} + 1)"));
+    axum::response::Redirect::permanent(&format!("http://{ADDR}/blog/{article_title}"))
+}
+
+pub async fn prev_article(
+    State(db): State<crate::database::Database>,
+    Path(id): Path<String>,
+) -> axum::response::Redirect {
+    let article_title = db.fetch_article_title_by_id(&format!("({id} - 1)"));
+    axum::response::Redirect::permanent(&format!("http://{ADDR}/blog/{article_title}"))
+}
+
+fn display_article(article_id: &str, article_title: &str, article_body: &str, is_last: bool) -> axum::response::Html<String> {
+
+    let article_title_decoded = urlencoding::decode(&article_title).unwrap();
 
     let article_body = base64::decode(article_body).unwrap();
     let article_body = String::from_utf8(article_body).unwrap();
@@ -125,17 +146,33 @@ pub async fn get_article(
     // Now we send this new vector of events off to be transformed into HTML
     html::push_html(&mut output, new_p.into_iter());
 
+    let next_link = format!("http://127.0.0.1:3000/blog/next/{article_id}");
+    let prev_link = format!("http://127.0.0.1:3000/blog/prev/{article_id}");
+
     let markup = maud::html! {
-        body style="padding: 5em; width: 60em; font-family: Helvetica; min-height: 100vh; display: flex; flex-direction: column" {
-            main style="flex: 1" {
-                h1 { (article_title) }
+        style {
+          (include_str!("article.css"))
+        }
+
+        body {
+            main {
+                h1 { (article_title_decoded) }
 
                 (maud::PreEscaped(output))
             }
 
-            footer style="flex-grow: 0; flex-shrink: 0; flex-basis: auto; position: fixed; bottom: 0" {
-                a { "prev" }
-                a { "next" }
+            footer {
+                @if article_id != "1" {
+                    a href=(prev_link) { "prev" }
+                } @else {
+                    a style="color: transparent" { "prev" }
+                }
+
+                @if !is_last {
+                    a href=(next_link) { "next" }
+                } @else {
+                    a style="color: transparent" { "next" }
+                }
             }
         }
     };

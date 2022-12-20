@@ -23,7 +23,8 @@ impl Database {
 
         let q = "
             CREATE TABLE blogs (
-                title TEXT NOT NULL PRIMARY KEY,
+                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
                 body TEXT NOT NULL,
                 added TEXT NOT NULL
             );
@@ -76,22 +77,33 @@ impl Database {
     }
 
 
-    pub fn fetch_article(&self, title: &str) -> (String, String) {
+    pub fn fetch_article(&self, title: &str) -> (String, String, String, bool) {
         let db = Arc::clone(&self.db);
         let db = db
             .lock()
             .unwrap();
 
         let q = format!("
-            SELECT title, body FROM blogs WHERE title = '{title}'
+            SELECT
+                (SELECT MAX(id) FROM blogs) AS max_id, id, title, body
+                FROM blogs
+                WHERE title = '{title}'
         ");
 
+        let mut article_max_id = String::new();
+        let mut article_id = String::new();
         let mut article_title = String::new();
         let mut article_body = String::new();
 
         db.iterate(q, |pairs| {
             for &(column, value) in pairs {
                 match (column, value) {
+                    ("max_id", Some(max_id)) => {
+                        article_max_id = String::from(max_id);
+                    },
+                    ("id", Some(id)) => {
+                        article_id = String::from(id);
+                    },
                     ("title", Some(title)) => {
                         article_title = String::from(title);
                     },
@@ -108,7 +120,40 @@ impl Database {
             true
         }).unwrap();
 
-        (article_title, article_body)
+        let is_last = article_id == article_max_id;
+
+        (article_id, article_title, article_body, is_last)
+    }
+
+
+    pub(crate) fn fetch_article_title_by_id(&self, id: &str) -> String {
+        let db = Arc::clone(&self.db);
+        let db = db
+            .lock()
+            .unwrap();
+
+        let q = format!("
+            SELECT title FROM blogs WHERE id = {id}
+        ");
+
+        let mut article_title = String::new();
+
+        db.iterate(q, |pairs| {
+            for &(column, value) in pairs {
+                match (column, value) {
+                    ("title", Some(title)) => {
+                        article_title = String::from(title);
+                        return true;
+                    },
+                    _ => {
+                        article_title = String::from("invalid format");
+                    }
+                }
+            }
+            true
+        }).unwrap();
+
+        article_title
     }
 
 
@@ -156,6 +201,7 @@ impl Database {
 
         deleted
     }
+
 }
 
 
