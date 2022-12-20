@@ -126,10 +126,17 @@ pub async fn get_article(
     html::push_html(&mut output, new_p.into_iter());
 
     let markup = maud::html! {
-        div style="padding: 5em; width: 60em; font-family: Helvetica" {
-            h1 { (article_title) }
+        body style="padding: 5em; width: 60em; font-family: Helvetica; min-height: 100vh; display: flex; flex-direction: column" {
+            main style="flex: 1" {
+                h1 { (article_title) }
 
-            (maud::PreEscaped(output))
+                (maud::PreEscaped(output))
+            }
+
+            footer style="flex-grow: 0; flex-shrink: 0; flex-basis: auto; position: fixed; bottom: 0" {
+                a { "prev" }
+                a { "next" }
+            }
         }
     };
 
