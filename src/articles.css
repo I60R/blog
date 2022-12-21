@@ -1,0 +1,20 @@
+body {
+	display: flex;
+	flex-direction: column;
+	padding: 5em;
+	width: 60e;
+}
+
+a .software {
+	font-weight: bold;
+}
+
+a .article {
+	padding-top: 0.5em;
+}
+
+main {
+	display: flex;
+	flex-direction: column;
+}
+

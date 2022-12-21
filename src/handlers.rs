@@ -23,22 +23,26 @@ pub async fn get_articles(
 
 
     let markup = maud::html! {
-        div style="display: flex; flex-direction: column; padding: 5em; width: 60em" {
+        style {
+            (include_str!("articles.css"))
+        }
+
+        body {
+
             h1 { "Welcome to 160R's blog!" }
+
             h2 { "Software" }
-            a href="https://github.com/I60R/page" style="font-weight: bold" {
-                "page"
-            }
-            a href="https://github.com/I60R/javelin" style="font-weight: bold" {
-                "javelin"
-            }
+
+            a .software href="https://github.com/I60R/page" { "page" }
+
+            a .software href="https://github.com/I60R/javelin" { "javelin" }
+
             h2 { "Articles" }
-            div style="display: flex; flex-direction: column" {
+
+            main {
+
                 @for (added, title) in articles {
-                    a
-                        href=(format!("http://{ADDR}/blog/{title}"))
-                        style="padding-top: 0.5em"
-                    {
+                    a .article href=(format!("http://{ADDR}/blog/{title}")) {
                         (format!("{added} - {title}\n"))
                     }
                 }
