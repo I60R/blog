@@ -1,0 +1,38 @@
+body {
+	padding: 5em;
+	width: 60em;
+
+	font-family: Helvetica;
+
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+main {
+	flex: 1;
+}
+
+footer {
+	flex-grow: 0;
+	flex-shrink: 0;
+	flex-basis: auto;
+
+	position: fixed;
+	bottom: 0;
+
+	background: white;
+}
+
+footer a {
+	align-items: center;
+	justify-content: center;
+	padding: 5em;
+	font-size: 150%;
+}
+
+.filler {
+	display: flex;
+	width: 6em;
+	padding: 5em;
+}
