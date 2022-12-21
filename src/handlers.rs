@@ -150,8 +150,8 @@ fn display_article(article_id: &str, article_title: &str, article_body: &str, is
     // Now we send this new vector of events off to be transformed into HTML
     html::push_html(&mut output, new_p.into_iter());
 
-    let next_link = format!("http://127.0.0.1:3000/blog/next/{article_id}");
-    let prev_link = format!("http://127.0.0.1:3000/blog/prev/{article_id}");
+    let next_link = format!("http://127.0.0.1:3000/blog/next/after_id={article_id}");
+    let prev_link = format!("http://127.0.0.1:3000/blog/prev/after_id={article_id}");
 
     let markup = maud::html! {
         style {

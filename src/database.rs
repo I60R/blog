@@ -52,11 +52,11 @@ impl Database {
 
         let mut resp = vec![];
 
-        db.iterate(q, |pairs| {
+        db.iterate(q, |columns| {
             let mut added = None;
 
-            for &(column, value) in pairs {
-                match (column, value) {
+            for &column in columns {
+                match column {
                     ("added", date_added) => {
                         added = date_added;
                     },
@@ -95,9 +95,9 @@ impl Database {
         let mut article_title = String::new();
         let mut article_body = String::new();
 
-        db.iterate(q, |pairs| {
-            for &(column, value) in pairs {
-                match (column, value) {
+        db.iterate(q, |columns| {
+            for &column in columns {
+                match column {
                     ("max_id", Some(max_id)) => {
                         article_max_id = String::from(max_id);
                     },
@@ -133,14 +133,14 @@ impl Database {
             .unwrap();
 
         let q = format!("
-            SELECT title FROM blogs WHERE id = {id}
+            SELECT title FROM blogs WHERE id = {id};
         ");
 
         let mut article_title = String::new();
 
-        db.iterate(q, |pairs| {
-            for &(column, value) in pairs {
-                match (column, value) {
+        db.iterate(q, |columns| {
+            for &column in columns {
+                match column {
                     ("title", Some(title)) => {
                         article_title = String::from(title);
                         return true;
@@ -152,6 +152,7 @@ impl Database {
             }
             true
         }).unwrap();
+
 
         article_title
     }
