@@ -1,5 +1,5 @@
 body {
-	padding: 5em;
+	padding-left: 7em;
 	width: 60em;
 
 	font-family: Helvetica;
@@ -14,20 +14,21 @@ main {
 }
 
 footer {
-	flex-grow: 0;
-	flex-shrink: 0;
-	flex-basis: auto;
+	display: flex;
+	flex-direction: column;
 
 	position: fixed;
-	bottom: 0;
+	left: 0;
 
 	background: white;
 }
 
 footer a {
-	align-items: center;
+	display: flex;
 	justify-content: center;
-	padding: 5em;
+
+	padding: 4em 1em 4em 1em;
+
 	font-size: 150%;
 }
 
