@@ -1,3 +1,9 @@
+
+h1 {
+	padding-top: 1em;
+}
+
+
 body {
 	display: flex;
 	flex-direction: column;
@@ -5,11 +11,11 @@ body {
 	width: 60e;
 }
 
-a .software {
+.software {
 	font-weight: bold;
 }
 
-a .article {
+.article {
 	padding-top: 0.5em;
 }
 
@@ -18,3 +24,14 @@ main {
 	flex-direction: column;
 }
 
+
+@media only screen and (max-width: 768px) {
+	h1 {
+		padding-top: 0em;
+	}
+	body {
+		padding-left: 1em;
+		padding-right: 1em;
+		width: 100%;
+	}
+}
