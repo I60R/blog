@@ -168,6 +168,8 @@ fn display_article(article_id: &str, article_title: &str, article_body: &str, is
                     a style="color: transparent" { "prev" }
                 }
 
+                a href=(format!("http://{ADDR}")) { "⌂" }
+
                 @if !is_last {
                     a href=(next_link) { "next" }
                 } @else {
