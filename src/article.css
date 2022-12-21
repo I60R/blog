@@ -1,9 +1,14 @@
+:root {
+	--bg: #BBEE88;
+}
+
 body {
+	background: var(--bg);
 	padding-left: 7em;
 	padding-right: 1em;
 	width: 60em;
 
-	font-family: Helvetica;
+	font-family: Droid Sans;
 
 	min-height: 100vh;
 	display: flex;
@@ -56,4 +61,8 @@ footer a {
 	display: flex;
 	width: 6em;
 	padding: 5em;
+}
+
+pre {
+	background-color: var(--bg) !important;
 }

@@ -5,10 +5,12 @@ h1 {
 
 
 body {
+	background: #BBEE88;
+	font-family: Droid Sans;
 	display: flex;
 	flex-direction: column;
 	padding-left: 7em;
-	width: 60e;
+	width: 60em;
 }
 
 .software {

@@ -43,7 +43,7 @@ pub async fn get_articles(
 
                 @for (added, title) in articles {
                     a .article href=(format!("http://{ADDR}/blog/{title}")) {
-                        (format!("{added} - {title}\n"))
+                        (format!("{added}  •  {title}\n"))
                     }
                 }
             }
