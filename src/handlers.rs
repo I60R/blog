@@ -169,7 +169,7 @@ fn display_article(article_id: &str, article_title: &str, article_body: &str, is
                 @if article_id != "1" {
                     a href=(prev_link) { "prev" }
                 } @else {
-                    a style="color: transparent" { "prev" }
+                    a { "end" }
                 }
 
                 a href=(format!("http://{ADDR}")) { "⌂" }
@@ -177,7 +177,7 @@ fn display_article(article_id: &str, article_title: &str, article_body: &str, is
                 @if !is_last {
                     a href=(next_link) { "next" }
                 } @else {
-                    a style="color: transparent" { "next" }
+                    a { "end" }
                 }
             }
         }
