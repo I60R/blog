@@ -4,6 +4,7 @@ use axum::{
     http,
     response,
 };
+use axum_auth::AuthBasic;
 use crate::database::{
     ArticleListItem,
     ArticleItem,
@@ -84,7 +85,6 @@ pub async fn next_article(
     let article_title = db
         .fetch_next_article_title_after_id(id)
         .await;
-    println!("{article_title}");
     response::Redirect::permanent(&format!("http://{ADDR}/blog/{article_title}"))
 }
 
@@ -95,7 +95,6 @@ pub async fn prev_article(
     let article_title = db
         .fetch_prev_article_title_before_id(id)
         .await;
-    println!("{article_title}");
     response::Redirect::permanent(&format!("http://{ADDR}/blog/{article_title}"))
 }
 
@@ -216,14 +215,10 @@ fn display_article(article_item: ArticleItem) -> response::Html<String> {
 pub async fn create_article(
     State(db): State<crate::database::Database>,
     Path(title): Path<String>,
-    headers: http::header::HeaderMap,
+    AuthBasic((id, password)): AuthBasic,
     body: String,
 ) -> http::StatusCode {
-
-    let Some(hv) = headers.get("authorization") else {
-        return http::StatusCode::UNAUTHORIZED
-    };
-    let Ok("Basic YWRtaW46YWRtaW4=") = hv.to_str() else {
+    let ("admin", Some("admin")) = (id.as_ref(), password.as_deref()) else {
         return http::StatusCode::UNAUTHORIZED
     };
 
@@ -240,13 +235,9 @@ pub async fn create_article(
 pub async fn delete_article(
     State(db): State<crate::database::Database>,
     Path(title): Path<String>,
-    headers: http::header::HeaderMap,
+    AuthBasic((id, password)): AuthBasic,
 ) -> http::StatusCode {
-
-    let Some(hv) = headers.get("authorization") else {
-        return http::StatusCode::UNAUTHORIZED
-    };
-    let Ok("Basic YWRtaW46YWRtaW4=") = hv.to_str() else {
+    let ("admin", Some("admin")) = (id.as_ref(), password.as_deref()) else {
         return http::StatusCode::UNAUTHORIZED
     };
 

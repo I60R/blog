@@ -11,8 +11,8 @@ use std::net::SocketAddr;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-
     dotenv::dotenv()?;
+
     let connection = sqlx::sqlite::SqlitePool::connect(
         &std::env::var("DATABASE_URL")?
     ).await?;

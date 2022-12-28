@@ -16,3 +16,4 @@ cmark-syntax = "0.4.1"
 syntect = "5.0.0"
 sqlx = { version = "0.6.2", features = ["sqlite", "macros", "runtime-tokio-rustls"] }
 dotenv = "0.15.0"
+axum-auth = "0.4.0"
