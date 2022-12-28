@@ -97,7 +97,6 @@ pub async fn prev_article(
 }
 
 fn display_article(article_item: ArticleItem) -> axum::response::Html<String> {
-
     let article_title_decoded = urlencoding::decode(&article_item.title)
         .unwrap();
 
@@ -184,7 +183,7 @@ fn display_article(article_item: ArticleItem) -> axum::response::Html<String> {
             }
 
             footer {
-                @if article_item.is_first {
+                @if !article_item.is_first {
                     a href=(
                         format!("http://{ADDR}/blog/prev/after_id={}", article_item.id)
                     ) { "prev" }

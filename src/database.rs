@@ -87,11 +87,13 @@ impl Database {
 }
 
 
+#[derive(Debug)]
 pub struct ArticleListItem {
     pub added: String,
     pub title: String
 }
 
+#[derive(Debug)]
 pub struct ArticleItem {
     pub body: String,
     pub title: String,
