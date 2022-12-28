@@ -40,7 +40,9 @@ impl Database {
     pub async fn fetch_article(&self, title: &str) -> ArticleItem {
         let q = sqlx::query_as!(
             ArticleItem,
-            "SELECT id, title, body, (id = (SELECT MAX(id) FROM blogs)) AS 'is_last: bool'
+            "SELECT id, title, body,
+                (id = (SELECT MAX(id) FROM blogs)) AS 'is_last: bool',
+                (id = (SELECT MIN(id) FROM blogs)) AS 'is_first: bool'
                 FROM blogs
                 WHERE title = ?
         ", title);
@@ -94,6 +96,7 @@ pub struct ArticleItem {
     pub body: String,
     pub title: String,
     pub is_last: bool,
+    pub is_first: bool,
     pub id: i64,
 
 }

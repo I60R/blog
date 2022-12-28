@@ -166,9 +166,6 @@ fn display_article(article_item: ArticleItem) -> axum::response::Html<String> {
     // Now we send this new vector of events off to be transformed into HTML
     html::push_html(&mut output, new_p.into_iter());
 
-    let next_link = format!("http://{ADDR}/blog/next/after_id={}", article_item.id);
-    let prev_link = format!("http://{ADDR}/blog/prev/after_id={}", article_item.id);
-
     let markup = maud::html! {
         style {
             (include_str!("article.css"))
@@ -187,8 +184,10 @@ fn display_article(article_item: ArticleItem) -> axum::response::Html<String> {
             }
 
             footer {
-                @if article_item.id != 1 {
-                    a href=(prev_link) { "prev" }
+                @if article_item.is_first {
+                    a href=(
+                        format!("http://{ADDR}/blog/prev/after_id={}", article_item.id)
+                    ) { "prev" }
                 } @else {
                     a { "end" }
                 }
@@ -196,7 +195,9 @@ fn display_article(article_item: ArticleItem) -> axum::response::Html<String> {
                 a href=(format!("http://{ADDR}")) { "⌂" }
 
                 @if !article_item.is_last {
-                    a href=(next_link) { "next" }
+                    a href=(
+                        format!("http://{ADDR}/blog/next/after_id={}", article_item.id)
+                    ) { "next" }
                 } @else {
                     a { "end" }
                 }
