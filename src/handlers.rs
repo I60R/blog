@@ -27,6 +27,11 @@ pub async fn get_articles(
             (include_str!("articles.css"))
         }
 
+        title { "160R blog"  }
+        link rel="icon" href=(
+            format!("data:image/svg+xml,{}", urlencoding::encode(include_str!("favicon.svg")))
+        ) { }
+
         body {
 
             h1 { "Welcome to 160R's blog!" }
@@ -155,8 +160,13 @@ fn display_article(article_id: &str, article_title: &str, article_body: &str, is
 
     let markup = maud::html! {
         style {
-          (include_str!("article.css"))
+            (include_str!("article.css"))
         }
+
+        title { (article_title_decoded) }
+        link rel="icon" href=(
+            format!("data:image/svg+xml,{}", urlencoding::encode(include_str!("favicon.svg")))
+        ) { }
 
         body {
             main {
