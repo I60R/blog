@@ -187,7 +187,7 @@ fn display_article(article_item: ArticleItem) -> response::Html<String> {
             footer {
                 @if !article_item.is_first {
                     a href=(
-                        format!("http://{ADDR}/blog/prev/after_id={}", article_item.id)
+                        format!("http://{ADDR}/blog/prev/{}", article_item.id)
                     ) { "prev" }
                 } @else {
                     a { "end" }
@@ -197,7 +197,7 @@ fn display_article(article_item: ArticleItem) -> response::Html<String> {
 
                 @if !article_item.is_last {
                     a href=(
-                        format!("http://{ADDR}/blog/next/after_id={}", article_item.id)
+                        format!("http://{ADDR}/blog/next/{}", article_item.id)
                     ) { "next" }
                 } @else {
                     a { "end" }

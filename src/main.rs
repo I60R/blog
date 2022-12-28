@@ -27,8 +27,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .route("/blog/", routing::get(
             || async { Redirect::permanent("/blog") })
         )
-        .route("/blog/next/after_id=:id", routing::get(handlers::next_article))
-        .route("/blog/prev/after_id=:id", routing::get(handlers::prev_article))
+        .route("/blog/next/:id", routing::get(handlers::next_article))
+        .route("/blog/next/:id/", routing::get(
+            |Path(id): Path<i64>| async move { Redirect::permanent(&format!("/blog/next/{id}")) })
+        )
+        .route("/blog/prev/:id", routing::get(handlers::prev_article))
+        .route("/blog/prev/:id/", routing::get(
+            |Path(id): Path<i64>| async move { Redirect::permanent(&format!("/blog/prev/{id}")) })
+        )
         .route("/blog/:title", routing::post(handlers::create_article))
         .route("/blog/:title", routing::delete(handlers::delete_article))
         .route("/blog/:title", routing::get(handlers::get_article))
