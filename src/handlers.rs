@@ -3,6 +3,10 @@ use axum::{
     extract::*,
     http,
 };
+use crate::database::{
+    ArticleListItem,
+    ArticleItem,
+};
 
 const ADDR: &str = "127.0.0.1:3000";
 
@@ -11,14 +15,14 @@ pub async fn get_articles(
     State(db): State<crate::database::Database>,
 ) -> axum::response::Html<String> {
 
-    let articles = db.fetch_articles();
+    let mut articles = db.fetch_articles().await;
     let articles = articles
-        .iter()
-        .map(|(added, title)| {
-
-            let title = urlencoding::decode(title).unwrap();
-
-            (added, title)
+        .iter_mut()
+        .map(|mut article_list_item| {
+            article_list_item.title = urlencoding::decode(&article_list_item.title)
+                .unwrap()
+                .to_string();
+            article_list_item
         });
 
 
@@ -46,7 +50,7 @@ pub async fn get_articles(
 
             main {
 
-                @for (added, title) in articles {
+                @for ArticleListItem { added, title } in articles {
                     a .article href=(format!("http://{ADDR}/blog/{title}")) {
                         (format!("{added}  •  {title}\n"))
                     }
@@ -67,33 +71,40 @@ pub async fn get_article(
 ) -> axum::response::Html<String> {
 
     let title = urlencoding::encode(&title);
-    let (article_id, article_title, article_body, is_last) = db.fetch_article(&title);
+    let aricle_item = db.fetch_article(&title).await;
 
-    display_article(&article_id, &article_title, &article_body, is_last)
+    display_article(aricle_item)
 }
 
 pub async fn next_article(
     State(db): State<crate::database::Database>,
-    Path(id): Path<String>,
+    Path(id): Path<i64>,
 ) -> axum::response::Redirect {
-    let article_title = db.fetch_article_title_by_id(&format!("({id} + 1)"));
+    let article_title = db
+        .fetch_article_title_by_id(id + 1)
+        .await;
     axum::response::Redirect::permanent(&format!("http://{ADDR}/blog/{article_title}"))
 }
 
 pub async fn prev_article(
     State(db): State<crate::database::Database>,
-    Path(id): Path<String>,
+    Path(id): Path<i64>,
 ) -> axum::response::Redirect {
-    let article_title = db.fetch_article_title_by_id(&format!("({id} - 1)"));
+    let article_title = db
+        .fetch_article_title_by_id(id - 1)
+        .await;
     axum::response::Redirect::permanent(&format!("http://{ADDR}/blog/{article_title}"))
 }
 
-fn display_article(article_id: &str, article_title: &str, article_body: &str, is_last: bool) -> axum::response::Html<String> {
+fn display_article(article_item: ArticleItem) -> axum::response::Html<String> {
 
-    let article_title_decoded = urlencoding::decode(&article_title).unwrap();
+    let article_title_decoded = urlencoding::decode(&article_item.title)
+        .unwrap();
 
-    let article_body = base64::decode(article_body).unwrap();
-    let article_body = String::from_utf8(article_body).unwrap();
+    let article_body = base64::decode(article_item.body)
+        .unwrap();
+    let article_body = String::from_utf8(article_body)
+        .unwrap();
 
     use syntect::{
         highlighting::ThemeSet,
@@ -155,8 +166,8 @@ fn display_article(article_id: &str, article_title: &str, article_body: &str, is
     // Now we send this new vector of events off to be transformed into HTML
     html::push_html(&mut output, new_p.into_iter());
 
-    let next_link = format!("http://127.0.0.1:3000/blog/next/after_id={article_id}");
-    let prev_link = format!("http://127.0.0.1:3000/blog/prev/after_id={article_id}");
+    let next_link = format!("http://{ADDR}/blog/next/after_id={}", article_item.id);
+    let prev_link = format!("http://{ADDR}/blog/prev/after_id={}", article_item.id);
 
     let markup = maud::html! {
         style {
@@ -176,7 +187,7 @@ fn display_article(article_id: &str, article_title: &str, article_body: &str, is
             }
 
             footer {
-                @if article_id != "1" {
+                @if article_item.id != 1 {
                     a href=(prev_link) { "prev" }
                 } @else {
                     a { "end" }
@@ -184,7 +195,7 @@ fn display_article(article_id: &str, article_title: &str, article_body: &str, is
 
                 a href=(format!("http://{ADDR}")) { "⌂" }
 
-                @if !is_last {
+                @if !article_item.is_last {
                     a href=(next_link) { "next" }
                 } @else {
                     a { "end" }
@@ -200,7 +211,7 @@ fn display_article(article_id: &str, article_title: &str, article_body: &str, is
 
 
 pub async fn create_article(
-    State(st): State<crate::database::Database>,
+    State(db): State<crate::database::Database>,
     Path(title): Path<String>,
     headers: axum::http::header::HeaderMap,
     body: String,
@@ -216,7 +227,7 @@ pub async fn create_article(
     let title = urlencoding::encode(&title);
     let body = base64::encode(body);
 
-    if st.create_article(&title, &body) {
+    if db.create_article(&title, &body).await {
         http::StatusCode::CREATED
     } else {
         http::StatusCode::CONFLICT
@@ -224,7 +235,7 @@ pub async fn create_article(
 }
 
 pub async fn delete_article(
-    State(st): State<crate::database::Database>,
+    State(db): State<crate::database::Database>,
     Path(title): Path<String>,
     headers: axum::http::header::HeaderMap,
 ) -> http::StatusCode {
@@ -238,7 +249,7 @@ pub async fn delete_article(
 
     let title = urlencoding::encode(&title);
 
-    if st.delete_article(&title) {
+    if db.delete_article(&title).await {
         http::StatusCode::OK
     } else {
         http::StatusCode::NO_CONTENT

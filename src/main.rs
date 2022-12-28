@@ -10,11 +10,14 @@ use std::net::SocketAddr;
 
 
 #[tokio::main]
-async fn main() {
-    let connection = sqlite::open("blogs.sqlite")
-        .expect("Cannot open DB");
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+
+    dotenv::dotenv()?;
+    let connection = sqlx::sqlite::SqlitePool::connect(
+        &std::env::var("DATABASE_URL")?
+    ).await?;
     let db = database::Database::new(connection);
-    db.init();
+    db.init().await;
 
     let app: axum::Router<_, axum::body::Body> = axum::Router::new()
         .route("/", routing::get(
@@ -37,6 +40,7 @@ async fn main() {
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
-        .await
-        .expect("Server Error");
+        .await?;
+
+    Ok(())
 }
