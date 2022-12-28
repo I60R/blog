@@ -81,8 +81,9 @@ pub async fn next_article(
     Path(id): Path<i64>,
 ) -> axum::response::Redirect {
     let article_title = db
-        .fetch_article_title_by_id(id + 1)
+        .fetch_next_article_title_after_id(id)
         .await;
+    println!("{article_title}");
     axum::response::Redirect::permanent(&format!("http://{ADDR}/blog/{article_title}"))
 }
 
@@ -91,8 +92,9 @@ pub async fn prev_article(
     Path(id): Path<i64>,
 ) -> axum::response::Redirect {
     let article_title = db
-        .fetch_article_title_by_id(id - 1)
+        .fetch_prev_article_title_before_id(id)
         .await;
+    println!("{article_title}");
     axum::response::Redirect::permanent(&format!("http://{ADDR}/blog/{article_title}"))
 }
 

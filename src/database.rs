@@ -52,14 +52,35 @@ impl Database {
     }
 
 
-    pub async fn fetch_article_title_by_id(&self, id: i64) -> String {
+    pub async fn fetch_next_article_title_after_id(&self, id: i64) -> String {
+        let id = id + 1;
         let q = sqlx::query!("
-            SELECT title FROM blogs WHERE id = ?;
-        ", id);
+            SELECT COALESCE(
+                (SELECT title FROM blogs WHERE id = ?),
+                (SELECT title FROM blogs WHERE id > ? ORDER BY id LIMIT 1)
+            ) AS title;
+        ", id, id);
 
         q.fetch_one(&self.db).await
             .expect("Query failed")
             .title
+            .unwrap_or_else(|| String::from("Deleted"))
+    }
+
+
+    pub async fn fetch_prev_article_title_before_id(&self, id: i64) -> String {
+        let id = id - 1;
+        let q = sqlx::query!("
+            SELECT COALESCE(
+                (SELECT title FROM blogs WHERE id = ?),
+                (SELECT title FROM blogs WHERE id < ? ORDER BY id DESC LIMIT 1)
+            ) AS title;
+        ", id, id);
+
+        q.fetch_one(&self.db).await
+            .expect("Query failed")
+            .title
+            .unwrap_or_else(|| String::from("Deleted"))
     }
 
 
