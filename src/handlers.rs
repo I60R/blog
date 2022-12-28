@@ -2,6 +2,7 @@
 use axum::{
     extract::*,
     http,
+    response,
 };
 use crate::database::{
     ArticleListItem,
@@ -13,7 +14,7 @@ const ADDR: &str = "127.0.0.1:3000";
 
 pub async fn get_articles(
     State(db): State<crate::database::Database>,
-) -> axum::response::Html<String> {
+) -> response::Html<String> {
 
     let mut articles = db.fetch_articles().await;
     let articles = articles
@@ -60,7 +61,7 @@ pub async fn get_articles(
     };
 
     let markup = markup.into_string();
-    axum::response::Html::from(markup)
+    response::Html::from(markup)
 }
 
 
@@ -68,7 +69,7 @@ pub async fn get_articles(
 pub async fn get_article(
     State(db): State<crate::database::Database>,
     Path(title): Path<String>,
-) -> axum::response::Html<String> {
+) -> response::Html<String> {
 
     let title = urlencoding::encode(&title);
     let aricle_item = db.fetch_article(&title).await;
@@ -79,26 +80,26 @@ pub async fn get_article(
 pub async fn next_article(
     State(db): State<crate::database::Database>,
     Path(id): Path<i64>,
-) -> axum::response::Redirect {
+) -> response::Redirect {
     let article_title = db
         .fetch_next_article_title_after_id(id)
         .await;
     println!("{article_title}");
-    axum::response::Redirect::permanent(&format!("http://{ADDR}/blog/{article_title}"))
+    response::Redirect::permanent(&format!("http://{ADDR}/blog/{article_title}"))
 }
 
 pub async fn prev_article(
     State(db): State<crate::database::Database>,
     Path(id): Path<i64>,
-) -> axum::response::Redirect {
+) -> response::Redirect {
     let article_title = db
         .fetch_prev_article_title_before_id(id)
         .await;
     println!("{article_title}");
-    axum::response::Redirect::permanent(&format!("http://{ADDR}/blog/{article_title}"))
+    response::Redirect::permanent(&format!("http://{ADDR}/blog/{article_title}"))
 }
 
-fn display_article(article_item: ArticleItem) -> axum::response::Html<String> {
+fn display_article(article_item: ArticleItem) -> response::Html<String> {
     let article_title_decoded = urlencoding::decode(&article_item.title)
         .unwrap();
 
@@ -142,7 +143,7 @@ fn display_article(article_item: ArticleItem) -> axum::response::Html<String> {
             Event::End(Tag::CodeBlock(_)) => {
                 if in_code_block {
                     // Format the whole multi-line code block as HTML all at once
-                    let html = highlighted_html_for_string(&to_highlight, &ss, &syntax, &theme)
+                    let html = highlighted_html_for_string(&to_highlight, &ss, syntax, theme)
                         .expect("cannot highlight");
                     // And put it into the vector
                     new_p.push(Event::Html(CowStr::from(html)));
@@ -207,7 +208,7 @@ fn display_article(article_item: ArticleItem) -> axum::response::Html<String> {
     };
 
     let markup = markup.into_string();
-    axum::response::Html::from(markup)
+    response::Html::from(markup)
 }
 
 
@@ -215,7 +216,7 @@ fn display_article(article_item: ArticleItem) -> axum::response::Html<String> {
 pub async fn create_article(
     State(db): State<crate::database::Database>,
     Path(title): Path<String>,
-    headers: axum::http::header::HeaderMap,
+    headers: http::header::HeaderMap,
     body: String,
 ) -> http::StatusCode {
 
@@ -239,7 +240,7 @@ pub async fn create_article(
 pub async fn delete_article(
     State(db): State<crate::database::Database>,
     Path(title): Path<String>,
-    headers: axum::http::header::HeaderMap,
+    headers: http::header::HeaderMap,
 ) -> http::StatusCode {
 
     let Some(hv) = headers.get("authorization") else {
