@@ -36,7 +36,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             |Path(id): Path<i64>| async move { Redirect::permanent(&format!("/blog/prev/{id}")) })
         )
         .route("/blog/:title", routing::post(handlers::create_article))
+        .route("/blog/:title/", routing::post(
+            |Path(title): Path<String>| async move { Redirect::permanent(&format!("/blog/{title}")) })
+        )
         .route("/blog/:title", routing::delete(handlers::delete_article))
+        .route("/blog/:title/", routing::delete(
+            |Path(title): Path<String>| async move { Redirect::permanent(&format!("/blog/{title}")) })
+        )
         .route("/blog/:title", routing::get(handlers::get_article))
         .route("/blog/:title/", routing::get(
             |Path(title): Path<String>| async move { Redirect::permanent(&format!("/blog/{title}")) })
