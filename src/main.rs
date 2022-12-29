@@ -17,12 +17,11 @@ pub const ADDR: &str = "127.0.0.1:3000";
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let connection = sqlx::mysql::MySqlPool::connect(
-            &std::env::var("DATABASE_URL")?
-        ).await?;
+        &std::env::var("DATABASE_URL")?
+    ).await?;
     let db = database::Database::new(connection);
-    db.migrate().await;
 
-    let app: axum::Router<_, axum::body::Body> = axum::Router::new()
+    let app: axum::Router = axum::Router::new()
         .route("/", routing::get(
             || async { Redirect::permanent("/blog") })
         )

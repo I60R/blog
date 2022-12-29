@@ -10,12 +10,6 @@ impl Database {
         Database { db: connection }
     }
 
-    pub async fn migrate(&self) {
-        sqlx::migrate!("./migrations")
-            .run(&self.db).await
-            .expect("Failed to migrate database")
-    }
-
     pub async fn fetch_articles(&self) -> Vec<article::ListItem> {
         let q = sqlx::query_as!(
             article::ListItem,
