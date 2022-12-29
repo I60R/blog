@@ -1,5 +1,6 @@
 mod handlers;
 mod database;
+mod view;
 
 use axum::{
     extract::Path,
@@ -8,10 +9,11 @@ use axum::{
 };
 use std::net::SocketAddr;
 
+pub const ADDR: &str = "127.0.0.1:3000";
+
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    dotenv::dotenv()?;
 
     let connection = sqlx::mysql::MySqlPool::connect(
             &std::env::var("DATABASE_URL")?
