@@ -1,0 +1,1 @@
+ALTER TABLE blogs MODIFY added DATE NOT NULL;

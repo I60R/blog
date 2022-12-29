@@ -11,7 +11,7 @@ impl Database {
     pub async fn fetch_articles(&self) -> Vec<ArticleListItem> {
         let q = sqlx::query_as!(
             ArticleListItem,
-            "SELECT added, title FROM blogs
+            "SELECT added, title FROM blogs ORDER BY id DESC
         ");
 
         q.fetch_all(&self.db).await
@@ -91,7 +91,7 @@ impl Database {
 
 #[derive(Debug)]
 pub struct ArticleListItem {
-    pub added: String,
+    pub added: sqlx::types::time::Date,
     pub title: String
 }
 

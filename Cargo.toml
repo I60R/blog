@@ -14,6 +14,6 @@ base64 = "0.20.0"
 urlencoding = "2.1.2"
 cmark-syntax = "0.4.1"
 syntect = "5.0.0"
-sqlx = { version = "0.6.2", features = ["mysql", "macros", "runtime-tokio-rustls"] }
+sqlx = { version = "0.6.2", features = ["mysql", "macros", "runtime-tokio-rustls", "time"] }
 dotenv = "0.15.0"
 axum-auth = "0.4.0"
