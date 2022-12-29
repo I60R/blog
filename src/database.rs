@@ -70,7 +70,7 @@ impl Database {
     pub async fn create_article(&self, title: &str, body: &str) -> bool {
         let q = sqlx::query!("
              INSERT IGNORE INTO blogs (title, body, added)
-                VALUES (?, ?, DATE('now'));
+                VALUES (?, ?, NOW());
         ", title, body);
 
         q.execute(&self.db).await
