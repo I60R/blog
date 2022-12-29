@@ -55,6 +55,7 @@ footer {
 footer a {
 	margin: 4em 1em 4em 1em;
 	font-size: 150%;
+	text-decoration: none;
 }
 
 .filler {
