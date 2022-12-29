@@ -1,3 +1,5 @@
+use crate::article;
+
 #[derive(Clone)]
 pub struct Database {
     db: sqlx::mysql::MySqlPool
@@ -14,9 +16,9 @@ impl Database {
             .expect("Failed to migrate database")
     }
 
-    pub async fn fetch_articles(&self) -> Vec<ArticleListItem> {
+    pub async fn fetch_articles(&self) -> Vec<article::ListItem> {
         let q = sqlx::query_as!(
-            ArticleListItem,
+            article::ListItem,
             "SELECT added, title FROM blogs ORDER BY id DESC
         ");
 
@@ -25,9 +27,9 @@ impl Database {
     }
 
 
-    pub async fn fetch_article(&self, title: &str) -> Option<ArticleItem> {
+    pub async fn fetch_article(&self, title: &str) -> Option<article::Item> {
         let q = sqlx::query_as!(
-            ArticleItem,
+            article::Item,
             "SELECT id, title, body,
                 (id <=> (SELECT MAX(id) FROM blogs)) AS 'is_last: bool',
                 (id <=> (SELECT MIN(id) FROM blogs)) AS 'is_first: bool'
@@ -92,21 +94,4 @@ impl Database {
             .rows_affected() != 0
     }
 
-}
-
-
-#[derive(Debug)]
-pub struct ArticleListItem {
-    pub added: sqlx::types::time::Date,
-    pub title: String
-}
-
-
-#[derive(Debug)]
-pub struct ArticleItem {
-    pub body: String,
-    pub title: String,
-    pub id: u32,
-    pub is_last: bool,
-    pub is_first: bool,
 }

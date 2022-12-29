@@ -1,5 +1,6 @@
 mod handlers;
 mod database;
+mod article;
 mod view;
 
 use axum::{

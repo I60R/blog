@@ -1,10 +1,10 @@
 use crate::{
-    database::{ArticleListItem, ArticleItem},
+    article,
     ADDR
 };
 
 
-pub fn display_articles(articles: Vec<ArticleListItem>) -> String {
+pub fn display_articles(articles: Vec<article::ListItem>) -> String {
     let markup = maud::html! {
         style {
             (include_str!("articles.css"))
@@ -29,7 +29,7 @@ pub fn display_articles(articles: Vec<ArticleListItem>) -> String {
 
             main {
 
-                @for ArticleListItem { added, title } in articles {
+                @for article::ListItem { added, title } in articles {
                     a .article href=(format!("http://{ADDR}/blog/{title}")) {
                         (format!("{added}  •  {title}\n"))
                     }
@@ -42,7 +42,7 @@ pub fn display_articles(articles: Vec<ArticleListItem>) -> String {
 }
 
 
-pub fn display_article(article_item: ArticleItem) -> String {
+pub fn display_article(article_item: article::Item) -> String {
     let article_title_decoded = urlencoding::decode(&article_item.title)
         .unwrap();
 
