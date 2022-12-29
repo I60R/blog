@@ -21,7 +21,8 @@ pub async fn get_articles(
             .to_string();
     }
 
-    view::display_articles(articles)
+    let v = view::display_articles(articles);
+    response::Html::from(v)
 }
 
 pub async fn get_article(
@@ -33,7 +34,8 @@ pub async fn get_article(
     let article_item = db.fetch_article(&title).await;
 
     if let Some(article_item) = article_item {
-        Ok(view::display_article(article_item))
+        let v = view::display_article(article_item);
+        Ok(response::Html::from(v))
     } else {
         Err(response::Redirect::permanent(&format!("http://{ADDR}/blog")))
     }

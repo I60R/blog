@@ -1,11 +1,10 @@
-use axum::response;
 use crate::{
     database::{ArticleListItem, ArticleItem},
     ADDR
 };
 
 
-pub fn display_articles(articles: Vec<ArticleListItem>) -> response::Html<String> {
+pub fn display_articles(articles: Vec<ArticleListItem>) -> String {
     let markup = maud::html! {
         style {
             (include_str!("articles.css"))
@@ -39,12 +38,11 @@ pub fn display_articles(articles: Vec<ArticleListItem>) -> response::Html<String
         }
     };
 
-    let markup = markup.into_string();
-    response::Html::from(markup)
+    markup.into_string()
 }
 
 
-pub fn display_article(article_item: ArticleItem) -> response::Html<String> {
+pub fn display_article(article_item: ArticleItem) -> String {
     let article_title_decoded = urlencoding::decode(&article_item.title)
         .unwrap();
 
@@ -152,6 +150,5 @@ pub fn display_article(article_item: ArticleItem) -> response::Html<String> {
         }
     };
 
-    let markup = markup.into_string();
-    response::Html::from(markup)
+    markup.into_string()
 }
