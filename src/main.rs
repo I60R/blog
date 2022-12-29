@@ -17,6 +17,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             &std::env::var("DATABASE_URL")?
         ).await?;
     let db = database::Database::new(connection);
+    db.migrate().await;
 
     let app: axum::Router<_, axum::body::Body> = axum::Router::new()
         .route("/", routing::get(
