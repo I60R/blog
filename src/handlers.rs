@@ -70,12 +70,16 @@ pub async fn get_articles(
 pub async fn get_article(
     State(db): State<crate::database::Database>,
     Path(title): Path<String>,
-) -> response::Html<String> {
+) -> impl response::IntoResponse {
 
     let title = urlencoding::encode(&title);
-    let aricle_item = db.fetch_article(&title).await;
+    let article_item = db.fetch_article(&title).await;
 
-    display_article(aricle_item)
+    if let Some(article_item) = article_item {
+        Ok(display_article(article_item))
+    } else {
+        Err(response::Redirect::permanent(&format!("http://{ADDR}/blog")))
+    }
 }
 
 pub async fn next_article(

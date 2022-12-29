@@ -13,11 +13,10 @@ use std::net::SocketAddr;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv::dotenv()?;
 
-    let connection = sqlx::sqlite::SqlitePool::connect(
-        &std::env::var("DATABASE_URL")?
-    ).await?;
+    let connection = sqlx::mysql::MySqlPool::connect(
+            &std::env::var("DATABASE_URL")?
+        ).await?;
     let db = database::Database::new(connection);
-    db.init().await;
 
     let app: axum::Router<_, axum::body::Body> = axum::Router::new()
         .route("/", routing::get(
