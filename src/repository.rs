@@ -4,6 +4,9 @@ use std::sync::Arc;
 
 use crate::{database, article::{self, ListItem}};
 
+
+trace::init_depth_var!();
+
 #[derive(Clone)]
 pub struct ArticlesRepository {
     db: database::Database,
@@ -24,8 +27,8 @@ impl ArticlesRepository {
         }
     }
 
-
     #[tracing::instrument]
+    #[trace::trace(pretty)]
     pub async fn fetch_articles(&mut self) -> Vec<Arc<ListItem>> {
         self.article_cache.sync();
         if self.articles_cache.entry_count() == 0 {
@@ -44,6 +47,7 @@ impl ArticlesRepository {
 
 
     #[tracing::instrument]
+    #[trace::trace(pretty)]
     pub async fn fetch_article(&mut self, title: &str) -> Option<Arc<article::Item>> {
         if let Some(article) = self.article_cache.get(title) {
             return Some(article)
@@ -58,6 +62,7 @@ impl ArticlesRepository {
     }
 
     #[tracing::instrument]
+    #[trace::trace(pretty)]
     pub async fn fetch_next_article_title_after_id(&mut self, id: u32) -> String {
         if let Some(article) = self.articles_cache.get(&(id + 1)) {
             return article.title.clone()
@@ -67,6 +72,7 @@ impl ArticlesRepository {
     }
 
     #[tracing::instrument]
+    #[trace::trace(pretty)]
     pub async fn fetch_prev_article_title_before_id(&self, id: u32) -> String {
         if let Some(article) = self.articles_cache.get(&(id - 1)) {
             return article.title.clone()
@@ -76,6 +82,7 @@ impl ArticlesRepository {
 
 
     #[tracing::instrument]
+    #[trace::trace(pretty)]
     pub async fn create_article(&mut self, title: &str, body: &str) -> bool {
         self.articles_cache.invalidate_all();
         self.article_cache.invalidate(title).await;
@@ -83,6 +90,7 @@ impl ArticlesRepository {
     }
 
     #[tracing::instrument]
+    #[trace::trace(pretty)]
     pub async fn delete_article(&mut self, title: &str) -> bool {
         self.articles_cache.invalidate_all();
         self.article_cache.invalidate(title).await;
