@@ -5,12 +5,12 @@ use axum::{
     response,
 };
 use axum_auth::AuthBasic;
-use crate::{view, ADDR};
+use crate::{view, ADDR, database};
 
 
 
 pub async fn get_articles(
-    State(db): State<crate::database::Database>,
+    State(db): State<database::Database>,
 ) -> response::Html<String> {
 
     let mut articles = db.fetch_articles().await;
@@ -26,7 +26,7 @@ pub async fn get_articles(
 }
 
 pub async fn get_article(
-    State(db): State<crate::database::Database>,
+    State(db): State<database::Database>,
     Path(title): Path<String>,
 ) -> impl response::IntoResponse {
 
@@ -42,7 +42,7 @@ pub async fn get_article(
 }
 
 pub async fn next_article(
-    State(db): State<crate::database::Database>,
+    State(db): State<database::Database>,
     Path(id): Path<i64>,
 ) -> response::Redirect {
     let article_title = db
@@ -52,7 +52,7 @@ pub async fn next_article(
 }
 
 pub async fn prev_article(
-    State(db): State<crate::database::Database>,
+    State(db): State<database::Database>,
     Path(id): Path<i64>,
 ) -> response::Redirect {
     let article_title = db
@@ -63,7 +63,7 @@ pub async fn prev_article(
 
 
 pub async fn create_article(
-    State(db): State<crate::database::Database>,
+    State(db): State<database::Database>,
     Path(title): Path<String>,
     AuthBasic((id, password)): AuthBasic,
     body: String,
@@ -83,7 +83,7 @@ pub async fn create_article(
 }
 
 pub async fn delete_article(
-    State(db): State<crate::database::Database>,
+    State(db): State<database::Database>,
     Path(title): Path<String>,
     AuthBasic((id, password)): AuthBasic,
 ) -> http::StatusCode {
