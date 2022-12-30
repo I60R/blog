@@ -17,6 +17,8 @@ pub const ADDR: &str = "http://127.0.0.1:3000";
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tracing_subscriber::fmt::init();
+
     let database_url = &std::env::var("DATABASE_URL")
         .map_err(|_| "No DATABASE_URL set, check README.md")?;
     let mysql = sqlx::mysql::MySqlPool::connect(database_url).await?;

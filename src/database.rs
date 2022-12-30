@@ -1,5 +1,6 @@
 use crate::article;
 
+
 #[derive(Clone)]
 pub struct Database {
     db: sqlx::mysql::MySqlPool
@@ -13,6 +14,8 @@ impl Database {
         Database { db: connection }
     }
 
+
+    #[tracing::instrument]
     pub async fn fetch_articles(&self) -> Vec<article::ListItem> {
         let q = sqlx::query_as!(
             article::ListItem,
@@ -23,7 +26,7 @@ impl Database {
             .expect("Query failed")
     }
 
-
+    #[tracing::instrument]
     pub async fn fetch_article(&self, title: &str) -> Option<article::Item> {
         let q = sqlx::query_as!(
             article::Item,
@@ -38,6 +41,7 @@ impl Database {
     }
 
 
+    #[tracing::instrument]
     pub async fn fetch_next_article_title_after_id(&self, id: u32) -> String {
         let id = id + 1;
         let q = sqlx::query!("
@@ -53,7 +57,7 @@ impl Database {
             .unwrap_or_else(|| String::from("Deleted"))
     }
 
-
+    #[tracing::instrument]
     pub async fn fetch_prev_article_title_before_id(&self, id: u32) -> String {
         let id = id - 1;
         let q = sqlx::query!("
@@ -69,7 +73,7 @@ impl Database {
             .unwrap_or_else(|| String::from("Deleted"))
     }
 
-
+    #[tracing::instrument]
     pub async fn create_article(&self, title: &str, body: &str) -> bool {
         let q = sqlx::query!("
              INSERT IGNORE INTO blogs (title, body, added)
@@ -81,6 +85,7 @@ impl Database {
             .rows_affected() != 0
     }
 
+    #[tracing::instrument]
     pub async fn delete_article(&self, title: &str) -> bool {
         let q = sqlx::query!("
             DELETE FROM blogs WHERE title = ?
@@ -90,5 +95,11 @@ impl Database {
             .expect("Query failed")
             .rows_affected() != 0
     }
+}
 
+
+impl std::fmt::Debug for Database {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("🖴 ")
+    }
 }
