@@ -7,12 +7,12 @@ use crate::{
 pub fn display_articles(articles: Vec<article::ListItem>) -> String {
     let markup = maud::html! {
         style {
-            (include_str!("articles.css"))
+            (include_str!("../css/articles.css"))
         }
 
         title { "160R blog"  }
         link rel="icon" href=(
-            format!("data:image/svg+xml,{}", urlencoding::encode(include_str!("favicon.svg")))
+            format!("data:image/svg+xml,{}", urlencoding::encode(include_str!("../assets/favicon.svg")))
         ) { }
 
         body {
@@ -113,12 +113,12 @@ pub fn display_article(article_item: article::Item) -> String {
 
     let markup = maud::html! {
         style {
-            (include_str!("article.css"))
+            (include_str!("../css/article.css"))
         }
 
         title { (article_title_decoded) }
         link rel="icon" href=(
-            format!("data:image/svg+xml,{}", urlencoding::encode(include_str!("favicon.svg")))
+            format!("data:image/svg+xml,{}", urlencoding::encode(include_str!("../assets/favicon.svg")))
         ) { }
 
         body {
