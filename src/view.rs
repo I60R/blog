@@ -5,6 +5,7 @@ use crate::{
 
 
 pub fn display_articles(articles: Vec<article::ListItem>) -> String {
+    let favicon = urlencoding::encode(include_str!("../assets/favicon.svg"));
     let markup = maud::html! {
         style {
             (include_str!("../css/articles.css"))
@@ -12,7 +13,7 @@ pub fn display_articles(articles: Vec<article::ListItem>) -> String {
 
         title { "160R blog"  }
         link rel="icon" href=(
-            format!("data:image/svg+xml,{}", urlencoding::encode(include_str!("../assets/favicon.svg")))
+            format!("data:image/svg+xml,{favicon}")
         ) { }
 
         body {
@@ -53,6 +54,8 @@ pub fn display_article(article_item: article::Item) -> String {
 
     let markdown_render = display_article::parse_markdown_with_code_blocks(&article_body);
 
+    let favicon = urlencoding::encode(include_str!("../assets/favicon.svg"));
+
     let markup = maud::html! {
         style {
             (include_str!("../css/article.css"))
@@ -60,7 +63,7 @@ pub fn display_article(article_item: article::Item) -> String {
 
         title { (article_title_decoded) }
         link rel="icon" href=(
-            format!("data:image/svg+xml,{}", urlencoding::encode(include_str!("../assets/favicon.svg")))
+            format!("data:image/svg+xml,{favicon}")
         ) { }
 
         body {
