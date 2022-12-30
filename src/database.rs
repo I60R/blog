@@ -43,7 +43,7 @@ impl Database {
 
     #[tracing::instrument]
     pub async fn fetch_next_article_title_after_id(&self, id: u32) -> String {
-        let id = id + 1;
+        let id = id.saturating_add(1);
         let q = sqlx::query!("
             SELECT COALESCE(
                 (SELECT title FROM blogs WHERE id = ?),
@@ -59,7 +59,7 @@ impl Database {
 
     #[tracing::instrument]
     pub async fn fetch_prev_article_title_before_id(&self, id: u32) -> String {
-        let id = id - 1;
+        let id = id.saturating_sub(1);
         let q = sqlx::query!("
             SELECT COALESCE(
                 (SELECT title FROM blogs WHERE id = ?),

@@ -64,7 +64,7 @@ impl ArticlesRepository {
     #[tracing::instrument]
     #[trace::trace(pretty)]
     pub async fn fetch_next_article_title_after_id(&mut self, id: u32) -> String {
-        if let Some(article) = self.articles_cache.get(&(id + 1)) {
+        if let Some(article) = self.articles_cache.get(&(id.saturating_add(1))) {
             return article.title.clone()
         }
         log::trace!("Cache missed");
@@ -74,7 +74,7 @@ impl ArticlesRepository {
     #[tracing::instrument]
     #[trace::trace(pretty)]
     pub async fn fetch_prev_article_title_before_id(&self, id: u32) -> String {
-        if let Some(article) = self.articles_cache.get(&(id - 1)) {
+        if let Some(article) = self.articles_cache.get(&(id.saturating_sub(1))) {
             return article.title.clone()
         }
         self.db.fetch_prev_article_title_before_id(id).await

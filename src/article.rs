@@ -21,8 +21,9 @@ impl std::fmt::Debug for Item {
         f.debug_struct("Item")
             .field("id", &self.id)
             .field("title", &self.title)
-            .field("body(length)", &self.body.len())
+            .field("#", &self.body.len())
             .field("is_last", &self.is_last)
-            .field("is_first", &self.is_first).finish()
+            .field("is_first", &self.is_first)
+            .finish()
     }
 }
