@@ -12,7 +12,6 @@ use crate::{view, ADDR, database};
 pub async fn get_articles(
     State(db): State<database::Database>,
 ) -> response::Html<String> {
-
     let mut articles = db.fetch_articles().await;
 
     for article_list_item in &mut articles {
@@ -29,7 +28,6 @@ pub async fn get_article(
     State(db): State<database::Database>,
     Path(title): Path<String>,
 ) -> impl response::IntoResponse {
-
     let title = urlencoding::encode(&title);
     let article_item = db.fetch_article(&title).await;
 
