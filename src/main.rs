@@ -8,6 +8,7 @@ use axum::{
     routing,
     response::Redirect,
 };
+use tower_http::services;
 use std::net::SocketAddr;
 
 pub const ADDR: &str = "127.0.0.1:3000";
@@ -43,6 +44,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .route("/blog/:title/", routing::get(
             |Path(title): Path<String>| async move { Redirect::permanent(&format!("/blog/{title}")) })
         )
+        .nest_service("/content", {
+            let dir = services::ServeDir::new("content");
+            routing::get_service(dir)
+                .handle_error(|e| async move { eprintln!("{e:?}") })
+        })
         .with_state(db);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
