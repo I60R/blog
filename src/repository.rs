@@ -32,10 +32,13 @@ impl ArticlesRepository {
                 self.articles_cache.insert(a.id, Arc::new(a)).await;
             }
         }
-        self.articles_cache.iter()
+        let mut articles: Vec<_> = self.articles_cache.iter()
             .map(|(_k, v)| v)
-            .collect()
+            .collect();
+        articles.sort_by(|a, b| b.id.cmp(&a.id));
+        articles
     }
+
 
     pub async fn fetch_article(&mut self, title: &str) -> Option<Arc<article::Item>> {
         if let Some(article) = self.article_cache.get(title) {
@@ -48,7 +51,6 @@ impl ArticlesRepository {
             None
         }
     }
-
 
     pub async fn fetch_next_article_title_after_id(&mut self, id: u32) -> String {
         if let Some(article) = self.articles_cache.get(&(id + 1)) {

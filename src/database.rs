@@ -16,7 +16,7 @@ impl Database {
     pub async fn fetch_articles(&self) -> Vec<article::ListItem> {
         let q = sqlx::query_as!(
             article::ListItem,
-            "SELECT id, added, title FROM blogs ORDER BY id DESC
+            "SELECT id, added, title FROM blogs
         ");
 
         q.fetch_all(&self.db).await
