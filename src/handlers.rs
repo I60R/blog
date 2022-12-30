@@ -5,33 +5,33 @@ use axum::{
     response,
 };
 use axum_auth::AuthBasic;
-use crate::{view, ADDR, database};
-
+use crate::{view, repository, ADDR, article};
 
 
 pub async fn get_articles(
-    State(db): State<database::Database>,
+    State(mut repo): State<repository::ArticlesRepository>,
 ) -> response::Html<String> {
-    let mut articles = db.fetch_articles().await;
-
-    for article_list_item in &mut articles {
-        article_list_item.title = urlencoding::decode(&article_list_item.title)
-            .unwrap()
-            .to_string();
-    }
-
+    let articles = repo.fetch_articles().await;
+    let articles = (&articles).iter().map(|a| {
+        article::ListItem {
+            added: a.added,
+            title: urlencoding::decode(&a.title)
+                .unwrap()
+                .to_string()
+        }
+    });
     let v = view::display_articles(articles);
     response::Html::from(v)
 }
 
 pub async fn get_article(
-    State(db): State<database::Database>,
+    State(mut repo): State<repository::ArticlesRepository>,
     Path(title): Path<String>,
 ) -> impl response::IntoResponse {
     let title = urlencoding::encode(&title);
-    let article_item = db.fetch_article(&title).await;
+    let article_item = repo.fetch_article(&title).await;
 
-    if let Some(article_item) = article_item {
+    if let Some(article_item) = article_item.as_ref() {
         let v = view::display_article(article_item);
         Ok(response::Html::from(v))
     } else {
@@ -40,28 +40,27 @@ pub async fn get_article(
 }
 
 pub async fn next_article(
-    State(db): State<database::Database>,
+    State(mut repo): State<repository::ArticlesRepository>,
     Path(id): Path<i64>,
 ) -> response::Redirect {
-    let article_title = db
+    let article_title = repo
         .fetch_next_article_title_after_id(id)
         .await;
-    response::Redirect::permanent(&format!("{ADDR}/blog/{article_title}"))
+    response::Redirect::permanent(&format!("{ADDR}/blog/{}", article_title.as_ref()))
 }
 
 pub async fn prev_article(
-    State(db): State<database::Database>,
+    State(repo): State<repository::ArticlesRepository>,
     Path(id): Path<i64>,
 ) -> response::Redirect {
-    let article_title = db
-        .fetch_prev_article_title_before_id(id)
-        .await;
-    response::Redirect::permanent(&format!("{ADDR}/blog/{article_title}"))
+    let article_title = repo
+        .fetch_prev_article_title_before_id(id).await;
+    response::Redirect::permanent(&format!("{ADDR}/blog/{}", article_title.as_ref()))
 }
 
 
 pub async fn create_article(
-    State(db): State<database::Database>,
+    State(mut repo): State<repository::ArticlesRepository>,
     Path(title): Path<String>,
     AuthBasic((id, password)): AuthBasic,
     body: String,
@@ -73,7 +72,7 @@ pub async fn create_article(
     let title = urlencoding::encode(&title);
     let body = base64::encode(body);
 
-    if db.create_article(&title, &body).await {
+    if repo.create_article(&title, &body).await {
         http::StatusCode::CREATED
     } else {
         http::StatusCode::CONFLICT
@@ -81,7 +80,7 @@ pub async fn create_article(
 }
 
 pub async fn delete_article(
-    State(db): State<database::Database>,
+    State(mut repo): State<repository::ArticlesRepository>,
     Path(title): Path<String>,
     AuthBasic((id, password)): AuthBasic,
 ) -> http::StatusCode {
@@ -91,7 +90,7 @@ pub async fn delete_article(
 
     let title = urlencoding::encode(&title);
 
-    if db.delete_article(&title).await {
+    if repo.delete_article(&title).await {
         http::StatusCode::OK
     } else {
         http::StatusCode::NO_CONTENT

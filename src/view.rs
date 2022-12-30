@@ -4,7 +4,9 @@ use crate::{
 };
 
 
-pub fn display_articles(articles: Vec<article::ListItem>) -> String {
+pub fn display_articles(
+    articles: impl IntoIterator<Item = article::ListItem>
+) -> String {
     let favicon = urlencoding::encode(include_str!("../assets/favicon.svg"));
     let markup = maud::html! {
         style {
@@ -43,11 +45,11 @@ pub fn display_articles(articles: Vec<article::ListItem>) -> String {
 }
 
 
-pub fn display_article(article_item: article::Item) -> String {
+pub fn display_article(article_item: &article::Item) -> String {
     let article_title_decoded = urlencoding::decode(&article_item.title)
         .unwrap();
 
-    let article_body = base64::decode(article_item.body)
+    let article_body = base64::decode(&article_item.body)
         .unwrap();
     let article_body = String::from_utf8(article_body)
         .unwrap();

@@ -1,6 +1,7 @@
 mod handlers;
 mod database;
 mod article;
+mod repository;
 mod view;
 
 use axum::{
@@ -18,8 +19,10 @@ pub const ADDR: &str = "http://127.0.0.1:3000";
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let database_url = &std::env::var("DATABASE_URL")
         .map_err(|_| "No DATABASE_URL set, check README.md")?;
-    let connection = sqlx::mysql::MySqlPool::connect(database_url).await?;
-    let db = database::Database::new_migrate(connection).await;
+    let mysql = sqlx::mysql::MySqlPool::connect(database_url).await?;
+    let db = database::Database::new_migrate(mysql).await;
+
+    let state = repository::ArticlesRepository::new(db);
 
     let app: axum::Router = axum::Router::new()
         .route("/", routing::get(
@@ -51,7 +54,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             routing::get_service(dir)
                 .handle_error(|e| async move { eprintln!("{e:?}") })
         })
-        .with_state(db);
+        .with_state(state);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
     axum::Server::bind(&addr)
