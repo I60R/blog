@@ -37,7 +37,7 @@ pub async fn get_article(
         let v = view::display_article(article_item);
         Ok(response::Html::from(v))
     } else {
-        Err(response::Redirect::permanent(&format!("http://{ADDR}/blog")))
+        Err(response::Redirect::permanent(&format!("{ADDR}/blog")))
     }
 }
 
@@ -48,7 +48,7 @@ pub async fn next_article(
     let article_title = db
         .fetch_next_article_title_after_id(id)
         .await;
-    response::Redirect::permanent(&format!("http://{ADDR}/blog/{article_title}"))
+    response::Redirect::permanent(&format!("{ADDR}/blog/{article_title}"))
 }
 
 pub async fn prev_article(
@@ -58,7 +58,7 @@ pub async fn prev_article(
     let article_title = db
         .fetch_prev_article_title_before_id(id)
         .await;
-    response::Redirect::permanent(&format!("http://{ADDR}/blog/{article_title}"))
+    response::Redirect::permanent(&format!("{ADDR}/blog/{article_title}"))
 }
 
 

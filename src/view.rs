@@ -30,7 +30,7 @@ pub fn display_articles(articles: Vec<article::ListItem>) -> String {
             main {
 
                 @for article::ListItem { added, title } in articles {
-                    a .article href=(format!("http://{ADDR}/blog/{title}")) {
+                    a .article href=(format!("{ADDR}/blog/{title}")) {
                         (format!("{added}  •  {title}\n"))
                     }
                 }
@@ -73,17 +73,17 @@ pub fn display_article(article_item: article::Item) -> String {
             footer {
                 @if !article_item.is_last {
                     a href=(
-                        format!("http://{ADDR}/blog/next/{}", article_item.id)
+                        format!("{ADDR}/blog/next/{}", article_item.id)
                     ) { "⇧" }
                 } @else {
                     a { "⏺" }
                 }
 
-                a href=(format!("http://{ADDR}")) { "⌂" }
+                a href=(format!("{ADDR}")) { "⌂" }
 
                 @if !article_item.is_first {
                     a href=(
-                        format!("http://{ADDR}/blog/prev/{}", article_item.id)
+                        format!("{ADDR}/blog/prev/{}", article_item.id)
                     ) { "⇩" }
                 } @else {
                     a { "X" }

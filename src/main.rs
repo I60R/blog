@@ -11,7 +11,7 @@ use axum::{
 use tower_http::services;
 use std::net::SocketAddr;
 
-pub const ADDR: &str = "127.0.0.1:3000";
+pub const ADDR: &str = "http://127.0.0.1:3000";
 
 
 #[tokio::main]
