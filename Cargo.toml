@@ -14,9 +14,4 @@ urlencoding = "2.1.2"
 cmark-syntax = "0.4.1"
 syntect = "5.0.0"
 sqlx = { version = "0.6.2", features = ["mysql", "macros", "runtime-tokio-rustls", "time", "migrate"] }
-dotenv = "0.15.0"
 axum-auth = "0.4.0"
-
-[build-dependencies]
-tokio = { version = "1.23.0", features = ["full"] }
-sqlx = { version = "0.6.2", features = ["mysql", "macros", "runtime-tokio-rustls", "time", "migrate"] }

@@ -6,7 +6,10 @@ pub struct Database {
 }
 
 impl Database {
-    pub fn new(connection: sqlx::mysql::MySqlPool) -> Database {
+    pub async fn new_migrate(connection: sqlx::mysql::MySqlPool) -> Database {
+        sqlx::migrate!("./migrations")
+            .run(&connection).await
+            .expect("Cannot migrate database");
         Database { db: connection }
     }
 

@@ -15,20 +15,14 @@ pub const ADDR: &str = "127.0.0.1:3000";
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-
-    let connection = sqlx::mysql::MySqlPool::connect(
-        &std::env::var("DATABASE_URL")?
-    ).await?;
-    let db = database::Database::new(connection);
+    let connection = sqlx::mysql::MySqlPool::connect(&std::env::var("DATABASE_URL")?).await?;
+    let db = database::Database::new_migrate(connection).await;
 
     let app: axum::Router = axum::Router::new()
         .route("/", routing::get(
             || async { Redirect::permanent("/blog") })
         )
         .route("/blog", routing::get(handlers::get_articles))
-        .route("/blog/", routing::get(
-            || async { Redirect::permanent("/blog") })
-        )
         .route("/blog/next/:id", routing::get(handlers::next_article))
         .route("/blog/next/:id/", routing::get(
             |Path(id): Path<i64>| async move { Redirect::permanent(&format!("/blog/next/{id}")) })
