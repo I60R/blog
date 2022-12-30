@@ -16,7 +16,7 @@ impl Database {
     pub async fn fetch_articles(&self) -> Vec<article::ListItem> {
         let q = sqlx::query_as!(
             article::ListItem,
-            "SELECT added, title FROM blogs ORDER BY id DESC
+            "SELECT id, added, title FROM blogs ORDER BY id DESC
         ");
 
         q.fetch_all(&self.db).await
@@ -38,7 +38,7 @@ impl Database {
     }
 
 
-    pub async fn fetch_next_article_title_after_id(&self, id: i64) -> String {
+    pub async fn fetch_next_article_title_after_id(&self, id: u32) -> String {
         let id = id + 1;
         let q = sqlx::query!("
             SELECT COALESCE(
@@ -54,7 +54,7 @@ impl Database {
     }
 
 
-    pub async fn fetch_prev_article_title_before_id(&self, id: i64) -> String {
+    pub async fn fetch_prev_article_title_before_id(&self, id: u32) -> String {
         let id = id - 1;
         let q = sqlx::query!("
             SELECT COALESCE(

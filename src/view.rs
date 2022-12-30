@@ -32,7 +32,7 @@ pub fn display_articles(
 
             main {
 
-                @for article::ListItem { added, title } in articles {
+                @for article::ListItem { added, title, .. } in articles {
                     a .article href=(format!("{ADDR}/blog/{title}")) {
                         (format!("{added}  •  {title}\n"))
                     }

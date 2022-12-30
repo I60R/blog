@@ -14,10 +14,11 @@ pub async fn get_articles(
     let articles = repo.fetch_articles().await;
     let articles = (&articles).iter().map(|a| {
         article::ListItem {
-            added: a.added,
+            id: a.id,
+            added: a.added.clone(),
             title: urlencoding::decode(&a.title)
                 .unwrap()
-                .to_string()
+                .to_string(),
         }
     });
     let v = view::display_articles(articles);
@@ -41,21 +42,21 @@ pub async fn get_article(
 
 pub async fn next_article(
     State(mut repo): State<repository::ArticlesRepository>,
-    Path(id): Path<i64>,
+    Path(id): Path<u32>,
 ) -> response::Redirect {
     let article_title = repo
         .fetch_next_article_title_after_id(id)
         .await;
-    response::Redirect::permanent(&format!("{ADDR}/blog/{}", article_title.as_ref()))
+    response::Redirect::permanent(&format!("{ADDR}/blog/{article_title}"))
 }
 
 pub async fn prev_article(
     State(repo): State<repository::ArticlesRepository>,
-    Path(id): Path<i64>,
+    Path(id): Path<u32>,
 ) -> response::Redirect {
     let article_title = repo
         .fetch_prev_article_title_before_id(id).await;
-    response::Redirect::permanent(&format!("{ADDR}/blog/{}", article_title.as_ref()))
+    response::Redirect::permanent(&format!("{ADDR}/blog/{article_title}"))
 }
 
 
