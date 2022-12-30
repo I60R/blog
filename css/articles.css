@@ -15,10 +15,12 @@ body {
 
 .software {
 	font-weight: bold;
+	width: fit-content;
 }
 
 .article {
 	padding-top: 0.5em;
+	width: fit-content;
 }
 
 main {
