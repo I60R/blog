@@ -17,7 +17,10 @@ pub const ADDR: &str = "http://127.0.0.1:3000";
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    tracing_subscriber::fmt::init();
+    let rust_log = std::env::var("RUST_LOG");
+    if matches!(rust_log.as_deref(), Ok("trace")) {
+        tracing_subscriber::fmt::init();
+    }
 
     let database_url = &std::env::var("DATABASE_URL")
         .map_err(|_| "No DATABASE_URL set, check README.md")?;
