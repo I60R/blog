@@ -164,3 +164,75 @@ mod display_article {
         output
     }
 }
+
+
+pub fn admin_login() -> String {
+    let favicon = urlencoding::encode(include_str!("../assets/favicon.svg"));
+
+    let markup = maud::html! {
+        style {
+            (maud::PreEscaped(include_str!("../css/admin_login.css")))
+        }
+
+        title { "Login" }
+        link rel="icon" href=(
+            format!("data:image/svg+xml,{favicon}")
+        ) { }
+
+        body {
+            div {
+                "username:"
+                input { }
+
+                "password:"
+                input { }
+
+                button {
+                    "Login"
+                }
+            }
+        }
+    };
+
+    markup.into_string()
+}
+
+pub fn admin_panel(
+    articles: impl IntoIterator<Item = article::ListItem>
+) -> String {
+    let favicon = urlencoding::encode(include_str!("../assets/favicon.svg"));
+    let markup = maud::html! {
+        style {
+            (maud::PreEscaped(include_str!("../css/admin_panel.css")))
+        }
+
+        title { "160R blog: admin"  }
+        link rel="icon" href=(
+            format!("data:image/svg+xml,{favicon}")
+        ) { }
+
+        body {
+
+            h2 { "Articles" }
+
+            main {
+
+                @for article::ListItem { added, title, .. } in articles {
+                    a .article href=(format!("{ADDR}/blog/{title}")) {
+                        (format!("{added}  •  {title}\n"))
+                    }
+
+                    button .edit {
+                        "edit"
+                    }
+                }
+            }
+
+            div .separator {
+
+            }
+        }
+    };
+
+    markup.into_string()
+}

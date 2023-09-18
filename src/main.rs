@@ -48,6 +48,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             |Path(title): Path<String>| async move { Redirect::permanent(&format!("/blog/{title}")) })
         )
 
+        // admin panel
+        .route("/login", routing::get(handlers::admin_login))
+        .route("/login/", routing::get(
+            || async move { Redirect::permanent("/login")}
+        ))
+        .route("/admin", routing::get(handlers::admin_panel))
+        .route("/admin/", routing::get(
+            || async move { Redirect::permanent("/admin")}
+        ))
+
         // manipulation
         .route("/blog/:title", routing::post(handlers::create_article))
         .route("/blog/:title/", routing::post(

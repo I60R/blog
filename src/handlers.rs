@@ -97,3 +97,33 @@ pub async fn delete_article(
         http::StatusCode::NO_CONTENT
     }
 }
+
+pub async fn admin_login() -> impl response::IntoResponse {
+    let v = view::admin_login();
+    response::Html::from(v)
+}
+
+pub async fn admin_panel(
+    State(mut repo): State<repository::ArticlesRepository>,
+    AuthBasic((id, password)): AuthBasic,
+) -> impl response::IntoResponse {
+    let ("admin", Some("admin")) = (id.as_ref(), password.as_deref()) else {
+
+        let status_code = http::StatusCode::UNAUTHORIZED.as_str()
+            .to_string();
+        return response::Html::from(status_code)
+    };
+
+    let articles = repo.fetch_articles().await;
+    let articles = (&articles).iter().map(|a| {
+        article::ListItem {
+            id: a.id,
+            added: a.added.clone(),
+            title: urlencoding::decode(&a.title)
+                .unwrap()
+                .to_string(),
+        }
+    });
+    let v = view::admin_panel(articles);
+    response::Html::from(v)
+}
