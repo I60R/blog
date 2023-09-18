@@ -10,7 +10,7 @@ pub fn display_articles(
     let favicon = urlencoding::encode(include_str!("../assets/favicon.svg"));
     let markup = maud::html! {
         style {
-            (include_str!("../css/articles.css"))
+            (maud::PreEscaped(include_str!("../css/articles.css")))
         }
 
         title { "160R blog"  }
@@ -60,7 +60,7 @@ pub fn display_article(article_item: &article::Item) -> String {
 
     let markup = maud::html! {
         style {
-            (include_str!("../css/article.css"))
+            (maud::PreEscaped(include_str!("../css/article.css")))
         }
 
         title { (article_title_decoded) }
@@ -77,9 +77,9 @@ pub fn display_article(article_item: &article::Item) -> String {
 
             footer {
                 @if !article_item.is_last {
-                    a href=(
+                    a .arrow_backward href=(
                         format!("{ADDR}/blog/next/{}", article_item.id)
-                    ) { "⇧" }
+                    ) { "" }
                 } @else {
                     a { "⏺" }
                 }
@@ -87,11 +87,11 @@ pub fn display_article(article_item: &article::Item) -> String {
                 a href=(format!("{ADDR}")) { "⌂" }
 
                 @if !article_item.is_first {
-                    a href=(
+                    a .arrow_forward href=(
                         format!("{ADDR}/blog/prev/{}", article_item.id)
-                    ) { "⇩" }
+                    ) { "" }
                 } @else {
-                    a { "X" }
+                    a { "⏺" }
                 }
            }
         }

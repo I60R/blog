@@ -53,6 +53,15 @@ footer {
 		padding-right: 1em;
 		width: 100%;
 	}
+
+	.arrow_backward::before {
+		content: "«" !important;
+	}
+
+	.arrow_forward::before {
+		content: "»" !important;
+	}
+
 }
 
 footer a {
@@ -62,6 +71,14 @@ footer a {
 	text-decoration: none;
 	width: 1rem;
 	height: 5rem;
+}
+
+.arrow_backward::before {
+	content : "⇧";
+}
+
+.arrow_forward::before {
+	content : "⇩";
 }
 
 .filler {
