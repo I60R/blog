@@ -1,0 +1,73 @@
+body {
+	background: #BBEE88;
+	font-family: Droid Sans;
+	display: flex;
+	flex-direction: column;
+	padding-left: 7em;
+	width: 60em;
+}
+
+.list {
+	display: flex;
+	padding-top: 0.5em;
+}
+
+.article {
+	width: fit-content;
+}
+
+.edit {
+	margin-right: 1em;
+	border: none;
+}
+
+
+main {
+	display: flex;
+	flex-direction: column;
+}
+
+.editor {
+	background-color: #FFFFFF;
+	position: fixed;
+	height: 33%;
+	left: 1em;
+	right: 1em;
+	bottom: 1px;
+	padding: 1em;
+	display: flex;
+	flex-direction: column;
+}
+
+.title {
+	display: flex;
+	flex-direction: row;
+}
+
+.name {
+	width: 100%;
+	padding: 0.1em 2em;
+	text-align: center;
+}
+
+.content {
+	width: 100%;
+	margin-top: 0.5em;
+	padding: 0.1em 2em;
+	flex: auto;
+}
+
+.post {
+	padding: 0.1em 2em;
+	margin-left: 1em;
+	border: none;
+}
+
+
+@media only screen and (max-width: 768px) {
+	body {
+		padding-left: 1em;
+		padding-right: 1em;
+		width: 100%;
+	}
+}

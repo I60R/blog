@@ -171,7 +171,7 @@ pub fn admin_login() -> String {
 
     let markup = maud::html! {
         style {
-            (maud::PreEscaped(include_str!("../css/admin_login.css")))
+            (maud::PreEscaped(include_str!("../css/login.css")))
         }
 
         title { "Login" }
@@ -203,7 +203,7 @@ pub fn admin_panel(
     let favicon = urlencoding::encode(include_str!("../assets/favicon.svg"));
     let markup = maud::html! {
         style {
-            (maud::PreEscaped(include_str!("../css/admin_panel.css")))
+            (maud::PreEscaped(include_str!("../css/admin.css")))
         }
 
         title { "160R blog: admin"  }
@@ -218,18 +218,31 @@ pub fn admin_panel(
             main {
 
                 @for article::ListItem { added, title, .. } in articles {
-                    a .article href=(format!("{ADDR}/blog/{title}")) {
-                        (format!("{added}  •  {title}\n"))
-                    }
 
-                    button .edit {
-                        "edit"
+                    div .list {
+                        button .edit {
+                            "edit"
+                        }
+
+                        a .article href=(format!("{ADDR}/blog/{title}")) {
+                            (format!("{added}  •  {title}\n"))
+                        }
                     }
                 }
             }
 
-            div .separator {
+            div .editor {
 
+                div .title {
+
+                    input .name { }
+
+                    button .post {
+                        "post"
+                    }
+                }
+
+                input .content { }
             }
         }
     };

@@ -105,14 +105,14 @@ pub async fn admin_login() -> impl response::IntoResponse {
 
 pub async fn admin_panel(
     State(mut repo): State<repository::ArticlesRepository>,
-    AuthBasic((id, password)): AuthBasic,
+    // AuthBasic((id, password)): AuthBasic,
 ) -> impl response::IntoResponse {
-    let ("admin", Some("admin")) = (id.as_ref(), password.as_deref()) else {
+    // let ("admin", Some("admin")) = (id.as_ref(), password.as_deref()) else {
 
-        let status_code = http::StatusCode::UNAUTHORIZED.as_str()
-            .to_string();
-        return response::Html::from(status_code)
-    };
+    //     let status_code = http::StatusCode::UNAUTHORIZED.as_str()
+    //         .to_string();
+    //     return response::Html::from(status_code)
+    // };
 
     let articles = repo.fetch_articles().await;
     let articles = (&articles).iter().map(|a| {
