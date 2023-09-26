@@ -7,7 +7,7 @@ use axum::{
 use axum_auth::AuthBasic;
 
 use crate::{
-    view,
+    view::views,
     ADDR,
     model::{article, repository}
 };
@@ -26,7 +26,7 @@ pub async fn get_articles(
                 .to_string(),
         }
     });
-    let v = view::display_articles(articles);
+    let v = views::display_articles(articles);
     response::Html::from(v)
 }
 
@@ -38,7 +38,7 @@ pub async fn get_article(
     let article_item = repo.fetch_article(&title).await;
 
     if let Some(article_item) = article_item.as_ref() {
-        let v = view::display_article(article_item);
+        let v = views::display_article(article_item);
         Ok(response::Html::from(v))
     } else {
         Err(response::Redirect::permanent(&format!("{ADDR}/blog")))
@@ -104,7 +104,7 @@ pub async fn delete_article(
 }
 
 pub async fn admin_login() -> impl response::IntoResponse {
-    let v = view::admin_login();
+    let v = views::admin_login();
     response::Html::from(v)
 }
 
@@ -129,6 +129,6 @@ pub async fn admin_panel(
                 .to_string(),
         }
     });
-    let v = view::admin_panel(articles);
+    let v = views::admin_panel(articles);
     response::Html::from(v)
 }
