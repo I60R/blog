@@ -3,6 +3,7 @@ mod database;
 mod article;
 mod repository;
 mod view;
+mod logging;
 
 use axum::{
     extract::Path,
@@ -18,9 +19,9 @@ pub const ADDR: &str = "http://127.0.0.1:3000";
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
-    main::init_logging();
+    logging::init_logging();
 
-    let db = main::connect_database().await?;
+    let db = database::connection::open().await?;
 
     // Initialize application state
     let state = repository::ArticlesRepository::new(db);
@@ -85,29 +86,4 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     Ok(())
-}
-
-mod main {
-    // Don't uses logging if `RUST_LOG` is unset
-    pub fn init_logging() {
-        let rust_log = std::env::var("RUST_LOG");
-        if matches!(rust_log.as_deref(), Ok("trace")) {
-            tracing_subscriber::fmt::init();
-        }
-    }
-
-    // Connects to a database using `DATABASE_URL` from .env
-    pub async fn connect_database() -> Result<
-        super::database::Database,
-        Box<dyn std::error::Error>,
-    > {
-        let database_url = &std::env::var("DATABASE_URL")
-            .map_err(|_| "No DATABASE_URL set, check README.md")?;
-
-        let mysql = sqlx::mysql::MySqlPool::connect(database_url).await?;
-
-        let db = super::database::Database::new_migrate(mysql).await;
-
-        Ok(db)
-    }
 }
