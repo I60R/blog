@@ -1,8 +1,6 @@
-mod handlers;
-mod database;
-mod article;
-mod repository;
+mod model;
 mod view;
+mod controller;
 mod logging;
 
 use axum::{
@@ -13,6 +11,8 @@ use axum::{
 use tower_http::services;
 use std::net::SocketAddr;
 
+use crate::controller::handlers;
+
 pub const ADDR: &str = "http://127.0.0.1:3000";
 
 
@@ -21,10 +21,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     logging::init_logging();
 
-    let db = database::connection::open().await?;
+    let db = model::connect_database().await?;
 
     // Initialize application state
-    let state = repository::ArticlesRepository::new(db);
+    let state = model::repository::ArticlesRepository::new(db);
 
     // Set routes
     let app: axum::Router = axum::Router::new()

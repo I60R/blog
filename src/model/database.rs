@@ -1,21 +1,4 @@
-use crate::article;
-
-
-pub mod connection {
-
-    // Connects to a database using `DATABASE_URL` from .env
-    pub async fn open() -> Result<super::Database, Box<dyn std::error::Error>> {
-        let database_url = &std::env::var("DATABASE_URL")
-            .map_err(|_| "No DATABASE_URL set, check README.md")?;
-
-        let mysql = sqlx::mysql::MySqlPool::connect(database_url).await?;
-
-        let db = super::Database::new_migrate(mysql).await;
-
-        Ok(db)
-    }
-
-}
+use super::article;
 
 
 #[derive(Clone)]

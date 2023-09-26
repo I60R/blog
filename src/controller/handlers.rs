@@ -5,7 +5,12 @@ use axum::{
     response,
 };
 use axum_auth::AuthBasic;
-use crate::{view, repository, ADDR, article};
+
+use crate::{
+    view,
+    ADDR,
+    model::{article, repository}
+};
 
 
 pub async fn get_articles(
